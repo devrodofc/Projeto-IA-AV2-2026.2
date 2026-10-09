@@ -1,0 +1,2 @@
+modelo,acuracia_media,acuracia_desvio,precisao_macro_media,precisao_macro_desvio,recall_macro_media,recall_macro_desvio,f1_macro_media,f1_macro_desvio,tempo_treinamento_media,tempo_treinamento_desvio,tempo_teste_media,tempo_teste_desvio
+knn_euclidiana,0.9115412470950461,0.006899443855748198,0.9093727821166381,0.009024384481463166,0.9050191347426442,0.005750724536828702,0.906939190199212,0.006907696087628027,0.0006353110002237372,0.00045901455738099677,13.367178938199505,0.20741864696863818

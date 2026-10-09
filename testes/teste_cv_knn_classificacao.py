@@ -1,5 +1,5 @@
-import sys
 import time
+import sys
 import numpy as np
 
 from src.utils.dados import carregar_arff
@@ -7,29 +7,25 @@ from src.utils.validacao import criar_folds
 from src.utils.normalizacao import Padronizador
 from src.utils.metricas import avaliar_classificacao
 from src.utils.exportacao import salvar_csv, resumir_resultados
-from src.classificacao.bayes import (
-    BayesUnivariado,
-    BayesMultivariado
-)
+from src.classificacao.knn import KNNClassificador
 
 
 def main():
 
-    if len(sys.argv) != 2:
-        raise ValueError(
-            "Informe 'univariado' ou 'multivariado'."
-        )
+    distancia = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else "euclidiana"
+    )
 
-    tipo = sys.argv[1].lower()
-
-    if tipo not in ("univariado", "multivariado"):
+    if distancia not in ("euclidiana", "manhattan"):
         raise ValueError(
-            "Use 'univariado' ou 'multivariado'."
+            "Use 'euclidiana' ou 'manhattan'."
         )
 
     print(
-        f"\n========== BAYES {tipo.upper()} ==========",
-        flush=True
+        f"\n========== VALIDAÇÃO CRUZADA kNN "
+        f"{distancia.upper()} =========="
     )
 
     X, y, _ = carregar_arff(
@@ -50,10 +46,7 @@ def main():
         start=1
     ):
 
-        print(
-            f"\n========== FOLD {numero} ==========",
-            flush=True
-        )
+        print(f"\n========== FOLD {numero} ==========", flush=True)
 
         X_treino = X[indices_treino]
         y_treino = y[indices_treino]
@@ -61,7 +54,6 @@ def main():
         X_teste = X[indices_teste]
         y_teste = y[indices_teste]
 
-        # Ajusta a padronização apenas no treino.
         padronizador = Padronizador()
 
         X_treino = padronizador.treinar_transformar(
@@ -72,14 +64,10 @@ def main():
             X_teste
         )
 
-        if tipo == "univariado":
-            modelo = BayesUnivariado(
-                regularizacao=1e-9
-            )
-        else:
-            modelo = BayesMultivariado(
-                regularizacao=1e-6
-            )
+        modelo = KNNClassificador(
+            k=3,
+            distancia=distancia
+        )
 
         inicio = time.perf_counter()
 
@@ -103,7 +91,7 @@ def main():
         )
 
         resultados.append({
-            "modelo": f"bayes_{tipo}",
+            "modelo": f"knn_{distancia}",
             "fold": numero,
             "acuracia": metricas["acuracia"],
             "precisao_macro": metricas["precisao_macro"],
@@ -133,10 +121,7 @@ def main():
             flush=True
         )
 
-    print(
-        "\n========== RESULTADOS FINAIS ==========",
-        flush=True
-    )
+    print("\n========== RESULTADOS FINAIS ==========")
 
     for metrica in resultados[0]:
 
@@ -153,23 +138,24 @@ def main():
 
         print(
             f"{metrica}: "
-            f"{media:.4f} ± {desvio:.4f}",
-            flush=True
+            f"{media:.4f} ± {desvio:.4f}"
         )
 
 
+    # Exporta os resultados individuais dos cinco folds.
     caminho_folds = salvar_csv(
-        f"resultados/classificacao/bayes_{tipo}_folds.csv",
+        f"resultados/classificacao/knn_{distancia}_folds.csv",
         resultados
     )
 
+    # Calcula e exporta as médias e desvios.
     resumo = resumir_resultados(
         resultados,
-        f"bayes_{tipo}"
+        f"knn_{distancia}"
     )
 
     caminho_resumo = salvar_csv(
-        f"resultados/classificacao/bayes_{tipo}_resumo.csv",
+        f"resultados/classificacao/knn_{distancia}_resumo.csv",
         [resumo]
     )
 

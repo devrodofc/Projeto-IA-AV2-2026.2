@@ -6,6 +6,7 @@ from src.utils.dados import carregar_arff
 from src.utils.validacao import criar_folds
 from src.utils.normalizacao import Padronizador
 from src.utils.metricas import avaliar_regressao
+from src.utils.exportacao import salvar_csv, resumir_resultados
 
 from src.regressao.knn import KNNRegressor
 from src.regressao.regressao_linear import RegressaoLinearMultipla
@@ -130,6 +131,8 @@ def main():
         )
 
         resultados.append({
+            "modelo": tipo,
+            "fold": numero,
             "mae": metricas["mae"],
             "r2": metricas["r2"],
             "r2_ajustado": metricas["r2_ajustado"],
@@ -170,6 +173,9 @@ def main():
 
     for metrica in resultados[0]:
 
+        if metrica in ("modelo", "fold"):
+            continue
+
         valores = np.array([
             resultado[metrica]
             for resultado in resultados
@@ -193,6 +199,26 @@ def main():
         "\nValidação cruzada concluída!",
         flush=True
     )
+
+
+    caminho_folds = salvar_csv(
+        f"resultados/regressao/{tipo}_folds.csv",
+        resultados
+    )
+
+    resumo = resumir_resultados(
+        resultados,
+        tipo
+    )
+
+    caminho_resumo = salvar_csv(
+        f"resultados/regressao/{tipo}_resumo.csv",
+        [resumo]
+    )
+
+    print("\nArquivos exportados:")
+    print(caminho_folds)
+    print(caminho_resumo)
 
 
 if __name__ == "__main__":

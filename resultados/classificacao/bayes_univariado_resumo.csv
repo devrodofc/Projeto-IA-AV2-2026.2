@@ -1,0 +1,2 @@
+modelo,acuracia_media,acuracia_desvio,precisao_macro_media,precisao_macro_desvio,recall_macro_media,recall_macro_desvio,f1_macro_media,f1_macro_desvio,tempo_treinamento_media,tempo_treinamento_desvio,tempo_teste_media,tempo_teste_desvio
+bayes_univariado,0.8143854139714248,0.008615268903644762,0.8266609711948846,0.006576846844132477,0.8391251751721566,0.0074680071154338895,0.8136764231186646,0.00847313912573313,0.0017598382000869606,0.0005153522057805258,0.025404523199540563,0.001906967581688778

@@ -1,0 +1,2 @@
+modelo,acuracia_media,acuracia_desvio,precisao_macro_media,precisao_macro_desvio,recall_macro_media,recall_macro_desvio,f1_macro_media,f1_macro_desvio,tempo_treinamento_media,tempo_treinamento_desvio,tempo_teste_media,tempo_teste_desvio
+knn_manhattan,0.9043666166902371,0.014281570358768479,0.9041273155104458,0.015803002929729703,0.8947570838767781,0.014871055158158645,0.8987738055957722,0.01504153887836751,0.0006247946010262239,0.0003730895346682346,11.854041520400642,0.1592086216027489
