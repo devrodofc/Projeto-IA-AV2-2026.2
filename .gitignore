@@ -13,3 +13,16 @@ __pycache__/
 
 # Arquivos temporários
 *.log
+
+# Arquivo temporário gerado pelo teste de exportação
+/resultados/teste_exportacao.csv
+
+# Arquivo temporário gerado pelo teste de exportaçãclear
+
+
+
+
+cat >> .gitignore <<'EOF'
+
+# Arquivo temporário gerado pelo teste de exportação
+/resultados/teste_exportacao.csv
