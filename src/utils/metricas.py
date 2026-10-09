@@ -210,3 +210,162 @@ def avaliar_classificacao(y_real, y_previsto):
         "matriz_confusao": matriz,
         "classes": classes
     }
+
+
+# ============================================================
+# MÉTRICAS DE REGRESSÃO
+# ============================================================
+
+
+def validar_regressao(y_real, y_previsto):
+    """
+    Valida os vetores utilizados nas métricas de regressão.
+    """
+
+    import numpy as np
+
+    y_real = np.asarray(y_real, dtype=float)
+    y_previsto = np.asarray(y_previsto, dtype=float)
+
+    if y_real.ndim != 1 or y_previsto.ndim != 1:
+        raise ValueError(
+            "Os valores reais e previstos devem ser vetores."
+        )
+
+    if len(y_real) == 0:
+        raise ValueError(
+            "Os vetores não podem estar vazios."
+        )
+
+    if len(y_real) != len(y_previsto):
+        raise ValueError(
+            "Os vetores devem possuir o mesmo tamanho."
+        )
+
+    if not np.all(np.isfinite(y_real)):
+        raise ValueError(
+            "Os valores reais contêm dados inválidos."
+        )
+
+    if not np.all(np.isfinite(y_previsto)):
+        raise ValueError(
+            "As previsões contêm dados inválidos."
+        )
+
+    return y_real, y_previsto
+
+
+def mae(y_real, y_previsto):
+    """
+    Calcula o Erro Absoluto Médio (MAE).
+    """
+
+    import numpy as np
+
+    y_real, y_previsto = validar_regressao(
+        y_real,
+        y_previsto
+    )
+
+    erros_absolutos = np.abs(
+        y_real - y_previsto
+    )
+
+    return float(np.mean(erros_absolutos))
+
+
+def r2_score(y_real, y_previsto):
+    """
+    Calcula o Coeficiente de Determinação (R²).
+
+    R² = 1 - (SSE / SST)
+    """
+
+    import numpy as np
+
+    y_real, y_previsto = validar_regressao(
+        y_real,
+        y_previsto
+    )
+
+    soma_erros_quadrados = np.sum(
+        (y_real - y_previsto) ** 2
+    )
+
+    media_real = np.mean(y_real)
+
+    soma_total_quadrados = np.sum(
+        (y_real - media_real) ** 2
+    )
+
+    # Quando todos os valores reais são iguais,
+    # a variação total é zero.
+    if np.isclose(soma_total_quadrados, 0.0):
+        if np.isclose(soma_erros_quadrados, 0.0):
+            return 1.0
+
+        return 0.0
+
+    return float(
+        1 - soma_erros_quadrados / soma_total_quadrados
+    )
+
+
+def r2_ajustado(y_real, y_previsto, quantidade_atributos):
+    """
+    Calcula o R² ajustado.
+
+    n = quantidade de instâncias
+    p = quantidade de atributos preditores
+    """
+
+    if (
+        not isinstance(quantidade_atributos, (int, np.integer))
+        or isinstance(quantidade_atributos, (bool, np.bool_))
+        or quantidade_atributos < 0
+    ):
+        raise ValueError(
+            "A quantidade de atributos deve ser um inteiro não negativo."
+        )
+
+    y_real, y_previsto = validar_regressao(
+        y_real,
+        y_previsto
+    )
+
+    n = len(y_real)
+    p = quantidade_atributos
+
+    if n <= p + 1:
+        raise ValueError(
+            "O R² ajustado exige n > p + 1."
+        )
+
+    r2 = r2_score(
+        y_real,
+        y_previsto
+    )
+
+    return float(
+        1 - (1 - r2) * (n - 1) / (n - p - 1)
+    )
+
+
+def avaliar_regressao(
+    y_real,
+    y_previsto,
+    quantidade_atributos
+):
+    """
+    Calcula todas as métricas de regressão.
+    """
+
+    return {
+        "mae": mae(y_real, y_previsto),
+        "r2": r2_score(y_real, y_previsto),
+        "r2_ajustado": r2_ajustado(
+            y_real,
+            y_previsto,
+            quantidade_atributos
+        )
+    }
