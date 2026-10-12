@@ -123,11 +123,20 @@ o intercepto.
 
 O kNN (classe `KNN` em `src/knn.py`, usada tanto para
 classificação quanto para regressão por meio do parâmetro
-`task`), a Regressão Linear Múltipla (classe `MRegression`)
-e o cálculo do R² (função `r_score`) seguem as
-implementações apresentadas em aula pela professora.
+`task`), o Bayes Univariado (classe `NaiveBayes` em
+`src/classificacao/bayes.py`), a Regressão Linear Múltipla
+(classe `MRegression`) e o cálculo do R² (função `r_score`)
+seguem as implementações apresentadas em aula pela professora.
 Ao kNN foi adicionado o parâmetro `distance` para permitir
-a distância Manhattan.
+a distância Manhattan. O código da aula do `NaiveBayes`
+contém apenas o treinamento (`fit`); a previsão (`predict`)
+foi completada no mesmo estilo, somando o log da priori aos
+logs das densidades normais de cada atributo.
+
+O `NaiveBayes` não usa regularização na variância. Nos
+experimentos nenhum atributo apresenta variância zero dentro
+de uma classe (a menor, após a padronização, é 0,63), então
+a densidade normal nunca divide por zero.
 
 ## 5. Pré-processamento
 

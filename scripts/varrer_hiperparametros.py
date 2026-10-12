@@ -7,11 +7,10 @@ from src.utils.dados import carregar_arff
 from src.utils.validacao import k_fold
 from src.utils.normalizacao import Padronizador
 from src.utils.metricas import avaliar_classificacao, avaliar_regressao
-from src.classificacao.bayes import BayesUnivariado
+from src.classificacao.bayes import NaiveBayes
 
 
 VALORES_K = [1, 3, 5, 7, 9, 11, 15, 21, 31, 51]
-VALORES_REGULARIZACAO = [1e-9, 1e-6, 1e-3, 1e-2, 1e-1, 1.0, 10.0]
 
 
 def ordenar_vizinhos(X_treino, X_teste, distancia, tamanho_bloco=200):
@@ -91,21 +90,21 @@ def varrer_classificacao():
         }
         print(f"Classificação kNN {distancia}: ok", flush=True)
 
-    for regularizacao in VALORES_REGULARIZACAO:
-        registros = []
+    # O Naive Bayes da aula não tem hiperparâmetro: uma única configuração.
+    registros = []
 
-        for X_treino, X_teste, y_treino, y_teste in folds:
-            modelo = BayesUnivariado(regularizacao=regularizacao)
-            modelo.treinar(X_treino, y_treino)
-            m = avaliar_classificacao(y_teste, modelo.prever(X_teste))
-            registros.append({
-                "acuracia": m["acuracia"],
-                "precisao_macro": m["precisao_macro"],
-                "recall_macro": m["recall_macro"],
-                "f1_macro": m["f1_macro"],
-            })
+    for X_treino, X_teste, y_treino, y_teste in folds:
+        modelo = NaiveBayes()
+        modelo.fit(X_treino, y_treino)
+        m = avaliar_classificacao(y_teste, modelo.predict(X_teste))
+        registros.append({
+            "acuracia": m["acuracia"],
+            "precisao_macro": m["precisao_macro"],
+            "recall_macro": m["recall_macro"],
+            "f1_macro": m["f1_macro"],
+        })
 
-        resultado["bayes"][repr(regularizacao)] = resumir(registros)
+    resultado["bayes"] = resumir(registros)
 
     print("Classificação Bayes: ok", flush=True)
 
@@ -149,7 +148,6 @@ def varrer_regressao():
 def main():
     dados = {
         "valores_k": VALORES_K,
-        "valores_regularizacao": [repr(v) for v in VALORES_REGULARIZACAO],
         "classificacao": varrer_classificacao(),
         "regressao": varrer_regressao(),
     }

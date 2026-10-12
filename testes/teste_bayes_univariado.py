@@ -2,7 +2,7 @@ import numpy as np
 
 from src.utils.dados import carregar_arff
 from src.utils.metricas import avaliar_classificacao
-from src.classificacao.bayes import BayesUnivariado
+from src.classificacao.bayes import NaiveBayes
 
 
 def main():
@@ -35,14 +35,12 @@ def main():
     print(f"Teste: {len(X_teste)} instâncias")
 
     # 4. Cria e treina o modelo.
-    modelo = BayesUnivariado(
-        regularizacao=1e-9
-    )
+    modelo = NaiveBayes()
 
-    modelo.treinar(X_treino, y_treino)
+    modelo.fit(X_treino, y_treino)
 
     # 5. Realiza as previsões.
-    previsoes = modelo.prever(X_teste)
+    previsoes = modelo.predict(X_teste)
 
     # 6. Calcula as métricas.
     resultado = avaliar_classificacao(
@@ -99,7 +97,7 @@ def main():
 
     print("\nProbabilidades iniciais das classes:")
 
-    for classe, probabilidade in modelo.priores.items():
+    for classe, probabilidade in zip(modelo._classes, modelo._prior):
 
         print(
             f"{classe}: {probabilidade * 100:.2f}%"

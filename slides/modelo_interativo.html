@@ -208,7 +208,7 @@ input[type="range"] { width: calc(var(--u) * 20); accent-color: var(--cyan); cur
 .btn:hover, .pilulas button:hover { color: #fff; }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
-.tabela-wrap { overflow-x: auto; border: 2px solid var(--frame-dark); background: var(--navy-2); }
+.tabela-wrap { flex-shrink: 0; overflow-x: auto; border: 2px solid var(--frame-dark); background: var(--navy-2); }
 table.res { color: #dbe7f6; border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.08); font-variant-numeric: tabular-nums; }
 table.res th, table.res td { text-align: left; padding: calc(var(--u) * 0.75) calc(var(--u) * 1.1); white-space: nowrap; vertical-align: top; }
 table.res thead th { color: var(--muted-dark); font-weight: 600; border-bottom: 1px solid var(--line-dark); font-size: calc(var(--u) * 0.95); letter-spacing: 0.04em; }
@@ -227,7 +227,10 @@ table.res td small { display: block; font-size: calc(var(--u) * 0.85); color: va
 .grafico .chaves { display: flex; gap: calc(var(--u) * 1.4); font-size: calc(var(--u) * 0.95); color: var(--muted-dark); flex-wrap: wrap; }
 .chave::before { content: ""; display: inline-block; width: calc(var(--u) * 1.6); height: 3px; vertical-align: middle; margin-right: calc(var(--u) * 0.45); background: currentColor; }
 .chave.tracejada::before { background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); }
-.grafico svg { width: 100%; height: auto; display: block; }
+.grafico svg { width: 100%; height: 100%; min-height: 0; flex: 1 1 0; display: block; }
+.grafico { min-height: 0; }
+.duplo { flex: 1 1 0; min-height: 0; }
+.duplo > div { display: flex; flex-direction: column; min-height: 0; }
 .duplo { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 1); }
 .duplo > * { min-width: 0; }
 .mini-titulo { font-size: calc(var(--u) * 0.95); color: var(--muted-dark); margin: 0 0 2px; }
@@ -432,7 +435,7 @@ y_pred = model.predict(X_test)</pre>
   <p class="grande" style="font-size:calc(var(--u)*2.7)">Uma normal por atributo, por classe.</p>
   <div>
     <p>Densidade normal univariada: p(x) = 1/(√(2π)·σ) · exp[−½((x − μ)/σ)²]</p>
-    <p>Treino: estima a priori P(Cₖ), a média μ e a variância σ² de cada atributo por classe (assume independência condicional). Uma pequena regularização é somada à variância para evitar σ² = 0.</p>
+    <p>Treino: estima a priori P(Cₖ), a média μ e a variância σ² de cada atributo por classe (assume independência condicional). Implementado com a classe NaiveBayes da aula (fit/predict).</p>
     <p>Previsão: classe com maior log P(Cₖ) + Σ log p(xⱼ | Cₖ). O logaritmo evita underflow numérico.</p>
   </div>
   <div class="formula" style="margin-top:auto">P(Cₖ | x) ∝ P(Cₖ) · ∏ⱼ 𝒩(xⱼ ; μₖⱼ, σ²ₖⱼ)</div>
@@ -494,15 +497,11 @@ y_pred = model.predict(X_test)</pre>
 <!-- 10 -->
 <section class="slide escuro" id="s10" data-titulo="Resultados de Classificação">
   <h2>3.3 Resultados de Classificação</h2>
-  <p class="sub">AutoUniv-au1-1000 · média ± desvio-padrão em 5 folds · mova os controles para ver o efeito dos hiperparâmetros</p>
+  <p class="sub">AutoUniv-au1-1000 · média ± desvio-padrão em 5 folds · mova o controle para ver o efeito de k</p>
   <div class="controles">
     <div class="controle">
       <label for="kc">k do kNN</label>
       <div class="linha"><input type="range" id="kc" min="0" max="9" step="1" value="1"><output id="kc-out" for="kc">k = 3</output></div>
-    </div>
-    <div class="controle">
-      <label for="rc">Regularização do Bayes (somada à variância)</label>
-      <div class="linha"><input type="range" id="rc" min="0" max="6" step="1" value="0"><output id="rc-out" for="rc">1e-9</output></div>
     </div>
     <button class="btn" id="cls-padrao" type="button">Voltar aos valores do trabalho</button>
   </div>
@@ -577,7 +576,7 @@ y_pred = model.predict(X_test)</pre>
       <p class="rotulo">Classificadores (acurácia e F1)</p>
       <p>Acurácia: Bayes 0.722 ≈ kNN 0.714.</p>
       <p>F1 macro: kNN 0.593 &gt; Bayes 0.566. O kNN acerta mais a classe minoritária.</p>
-      <p>Teste: Bayes 0.004 s vs. kNN ~0.45 s (≈100× mais rápido).</p>
+      <p>Teste: Bayes 0.005 s vs. kNN ~0.45 s (≈100× mais rápido).</p>
     </div>
     <div class="caixa">
       <p class="rotulo">Regressores (R² e MAE)</p>
@@ -605,9 +604,9 @@ y_pred = model.predict(X_test)</pre>
       <p style="margin-top:calc(var(--u)*0.8)">O MAE é menor em k = 1 (<span class="num">0.441</span>) porque copia notas inteiras: acerta muitas exatamente e erra feio as outras, o que o R² penaliza. <b>Melhor k pelo R²: 7 a 11.</b></p>
     </div>
     <div class="caixa">
-      <h3>Regularização do Bayes</h3>
-      <p>Até <span class="num">0.01</span> não muda nada. Com <span class="num">1</span> ou mais, a acurácia vai para <span class="num">0.741</span>, igual a prever sempre class2, e o F1 cai para <span class="num">0.43</span>.</p>
-      <p style="margin-top:calc(var(--u)*0.8)">Variância inflada demais apaga as diferenças entre as classes. <b>Melhor: manter pequena (1e-9).</b></p>
+      <h3>Bayes Univariado</h3>
+      <p>A classe NaiveBayes da aula não tem hiperparâmetro: média, variância e priori saem direto dos dados de treino.</p>
+      <p style="margin-top:calc(var(--u)*0.8)">Verificamos que nenhum atributo tem variância zero em nenhuma classe (a menor é <span class="num">0.63</span> após a padronização), então a densidade normal nunca divide por zero. <b>Resultado fixo: F1 0.566.</b></p>
     </div>
   </div>
   <p class="fecho" style="margin-top:auto">Aumentar k reduz a variância e aumenta o viés. O ponto ótimo depende da métrica escolhida, por isso a métrica deve ser definida antes de ajustar.</p>
@@ -623,7 +622,7 @@ y_pred = model.predict(X_test)</pre>
     </div>
     <div style="display:grid;gap:calc(var(--u)*1.3);color:#e6f0fb">
       <p>Melhor desempenho: kNN no F1 da classificação (0.593; 0.604 com k = 5) e kNN Manhattan na regressão (MAE 0.522, R² 0.360; R² 0.369 com k = 11).</p>
-      <p>Mais rápidos: Bayes Univariado (0.004 s de teste) e Regressão Linear (&lt; 1 ms).</p>
+      <p>Mais rápidos: Bayes Univariado (0.005 s de teste) e Regressão Linear (&lt; 1 ms).</p>
       <p>Vale a pena? Na classificação, o Bayes entrega acurácia equivalente ~100× mais rápido. Na regressão, o kNN ganha +0.07 de R² ao custo de ~18 s por fold; compensa só se a previsão não precisar ser em tempo real.</p>
       <p>Limitações: dataset de classificação artificial, ruidoso e desbalanceado (prever sempre a classe majoritária daria 0.741 de acurácia); R² moderado no Wine Quality; k escolhido sem validação aninhada.</p>
     </div>
@@ -659,19 +658,13 @@ y_pred = model.predict(X_test)</pre>
 (function () {
   const D = JSON.parse(document.getElementById("dados").textContent);
   const K = D.valores_k;
-  const REG = D.valores_regularizacao;
   const C = D.classificacao;
   const R = D.regressao;
   const T = D.tempos;
-  const PADRAO = { kc: K.indexOf(3), kr: K.indexOf(5), rc: 0 };
-  const estado = { kc: PADRAO.kc, kr: PADRAO.kr, rc: PADRAO.rc, dc: "euclidiana", dr: "manhattan" };
+  const PADRAO = { kc: K.indexOf(3), kr: K.indexOf(5) };
+  const estado = { kc: PADRAO.kc, kr: PADRAO.kr, dc: "euclidiana", dr: "manhattan" };
 
   const f3 = (v) => v.toFixed(3);
-  const regTexto = (s) => {
-    const v = Number(s);
-    if (v >= 0.01) return String(v);
-    return v.toExponential(0).replace("e-", "e-");
-  };
   const md = (par) => `${f3(par[0])} ± ${f3(par[1])}`;
 
   function delta(atual, ref, maior, rotuloRef) {
@@ -693,15 +686,12 @@ y_pred = model.predict(X_test)</pre>
 
   function renderCls() {
     const k = K[estado.kc];
-    const reg = REG[estado.rc];
     document.getElementById("kc-out").textContent = `k = ${k}`;
-    document.getElementById("rc-out").textContent = regTexto(reg);
     const mudouK = estado.kc !== PADRAO.kc;
-    const mudouR = estado.rc !== PADRAO.rc;
     document.getElementById("cls-corpo").innerHTML =
       linhaCls(`kNN (Euclidiana)<small>k = ${k}</small>`, C.knn_euclidiana[k], C.knn_euclidiana["3"], "k=3", T.cls.knn_euclidiana, mudouK) +
       linhaCls(`kNN (Manhattan)<small>k = ${k}</small>`, C.knn_manhattan[k], C.knn_manhattan["3"], "k=3", T.cls.knn_manhattan, mudouK) +
-      linhaCls(`Bayes Univariado<small>reg. = ${regTexto(reg)}</small>`, C.bayes[reg], C.bayes[REG[0]], "1e-9", T.cls.bayes_univariado, mudouR);
+      linhaCls(`Bayes Univariado<small>sem hiperparâmetro</small>`, C.bayes, C.bayes, "", T.cls.bayes_univariado, false);
 
     const serie = C["knn_" + estado.dc];
     grafico(document.getElementById("graf-cls"), {
@@ -719,8 +709,7 @@ y_pred = model.predict(X_test)</pre>
       `<h3>Se aumentar k (kNN ${nomeDist}, k = ${k})</h3>` +
       veredito("Acurácia", K.map((x) => serie[x].acuracia[0]), estado.kc, true, K, "k") +
       veredito("F1 macro", K.map((x) => serie[x].f1_macro[0]), estado.kc, true, K, "k") +
-      `<h3 style="margin-top:calc(var(--u)*0.4)">Se aumentar a regularização do Bayes</h3>` +
-      veredito("F1 macro", REG.map((r) => C.bayes[r].f1_macro[0]), estado.rc, true, REG.map(regTexto), "reg.");
+      `<div class="item"><b>Bayes Univariado:</b> não tem hiperparâmetro (classe NaiveBayes da aula). Resultado fixo: acurácia ${f3(C.bayes.acuracia[0])}, F1 ${f3(C.bayes.f1_macro[0])}.</div>`;
   }
 
   // ---------- Regressão ----------
@@ -819,7 +808,6 @@ y_pred = model.predict(X_test)</pre>
     });
   };
   liga("kc", "kc", renderCls);
-  liga("rc", "rc", renderCls);
   liga("kr", "kr", renderReg);
 
   document.querySelectorAll("#s10 [data-dist], #s11 [data-dist]").forEach((b) => {
@@ -832,9 +820,8 @@ y_pred = model.predict(X_test)</pre>
     });
   });
   document.getElementById("cls-padrao").addEventListener("click", () => {
-    estado.kc = PADRAO.kc; estado.rc = PADRAO.rc;
+    estado.kc = PADRAO.kc;
     document.getElementById("kc").value = PADRAO.kc;
-    document.getElementById("rc").value = PADRAO.rc;
     renderCls();
   });
   document.getElementById("reg-padrao").addEventListener("click", () => {

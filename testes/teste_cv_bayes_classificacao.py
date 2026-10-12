@@ -6,7 +6,7 @@ from src.utils.validacao import k_fold
 from src.utils.normalizacao import Padronizador
 from src.utils.metricas import avaliar_classificacao
 from src.utils.exportacao import salvar_csv, resumir_resultados
-from src.classificacao.bayes import BayesUnivariado
+from src.classificacao.bayes import NaiveBayes
 
 
 def main():
@@ -47,13 +47,11 @@ def main():
             X_teste
         )
 
-        modelo = BayesUnivariado(
-            regularizacao=1e-9
-        )
+        modelo = NaiveBayes()
 
         inicio = time.perf_counter()
 
-        modelo.treinar(X_treino, y_treino)
+        modelo.fit(X_treino, y_treino)
 
         tempo_treinamento = (
             time.perf_counter() - inicio
@@ -61,7 +59,7 @@ def main():
 
         inicio = time.perf_counter()
 
-        previsoes = modelo.prever(X_teste)
+        previsoes = modelo.predict(X_teste)
 
         tempo_teste = (
             time.perf_counter() - inicio
