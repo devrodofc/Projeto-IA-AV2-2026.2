@@ -274,41 +274,25 @@ def mae(y_real, y_previsto):
     return float(np.mean(erros_absolutos))
 
 
+def r_score(y_true, y_pred):
+    numerador = np.sum((y_true-y_pred)**2)
+    denominador = np.sum((y_true-np.mean(y_true))**2)
+    r2_score = 1 - (numerador/denominador)
+    return r2_score
+
+
 def r2_score(y_real, y_previsto):
     """
-    Calcula o Coeficiente de Determinação (R²).
-
-    R² = 1 - (SSE / SST)
+    Calcula o Coeficiente de Determinação (R²)
+    utilizando a função r_score.
     """
-
-    import numpy as np
 
     y_real, y_previsto = validar_regressao(
         y_real,
         y_previsto
     )
 
-    soma_erros_quadrados = np.sum(
-        (y_real - y_previsto) ** 2
-    )
-
-    media_real = np.mean(y_real)
-
-    soma_total_quadrados = np.sum(
-        (y_real - media_real) ** 2
-    )
-
-    # Quando todos os valores reais são iguais,
-    # a variação total é zero.
-    if np.isclose(soma_total_quadrados, 0.0):
-        if np.isclose(soma_erros_quadrados, 0.0):
-            return 1.0
-
-        return 0.0
-
-    return float(
-        1 - soma_erros_quadrados / soma_total_quadrados
-    )
+    return float(r_score(y_real, y_previsto))
 
 
 def r2_ajustado(y_real, y_previsto, quantidade_atributos):

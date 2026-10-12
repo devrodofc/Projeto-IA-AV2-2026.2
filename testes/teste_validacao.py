@@ -1,40 +1,53 @@
 import numpy as np
 
 from src.utils.dados import carregar_arff
-from src.utils.validacao import criar_folds
+from src.utils.validacao import k_fold
 
 
-def verificar_folds(y, folds):
+def verificar_folds(n, k=5):
+    """
+    Usa os próprios índices como X e y para verificar
+    se os folds de teste são disjuntos e cobrem
+    todas as instâncias.
+    """
+
+    indices = np.arange(n)
+
+    folds = k_fold(indices, indices, k=k, random_state=42)
+
+    assert len(folds) == k
 
     todos_indices_teste = []
 
-    for numero, (treino, teste) in enumerate(
+    for numero, (X_treino, X_teste, y_treino, y_teste) in enumerate(
         folds,
         start=1
     ):
 
         print(
             f"Fold {numero}: "
-            f"{len(treino)} treinamento | "
-            f"{len(teste)} teste"
+            f"{len(X_treino)} treinamento | "
+            f"{len(X_teste)} teste"
         )
 
         # Treinamento e teste não podem
         # compartilhar instâncias.
         assert len(
-            np.intersect1d(treino, teste)
+            np.intersect1d(X_treino, X_teste)
         ) == 0
 
+        assert len(X_treino) + len(X_teste) == n
+
         todos_indices_teste.extend(
-            teste.tolist()
+            X_teste.tolist()
         )
 
     # Cada instância deve aparecer uma vez no teste.
-    assert len(todos_indices_teste) == len(y)
+    assert len(todos_indices_teste) == n
 
     assert len(
         np.unique(todos_indices_teste)
-    ) == len(y)
+    ) == n
 
 
 def main():
@@ -42,33 +55,29 @@ def main():
     print("\n========== CLASSIFICAÇÃO ==========")
 
     X, y, _ = carregar_arff(
-        "datasets/classificacao/spambase.arff"
+        "datasets/classificacao/autoUniv-au1-1000.arff"
     )
 
-    folds = criar_folds(
-        y,
-        quantidade_folds=5,
-        estratificado=True,
-        semente=42
-    )
-
-    verificar_folds(y, folds)
+    verificar_folds(len(X))
 
     print("\nDistribuição das classes por fold:")
 
-    for numero, (_, teste) in enumerate(
+    folds = k_fold(X, y, k=5, random_state=42)
+
+    for numero, (_, _, _, y_teste) in enumerate(
         folds,
         start=1
     ):
 
         classes, quantidades = np.unique(
-            y[teste],
+            y_teste,
             return_counts=True
         )
 
-        distribuicao = dict(
-            zip(classes, quantidades)
-        )
+        distribuicao = {
+            str(classe): int(quantidade)
+            for classe, quantidade in zip(classes, quantidades)
+        }
 
         print(
             f"Fold {numero}: {distribuicao}"
@@ -81,14 +90,7 @@ def main():
         atributo_alvo="quality"
     )
 
-    folds = criar_folds(
-        y,
-        quantidade_folds=5,
-        estratificado=False,
-        semente=42
-    )
-
-    verificar_folds(y, folds)
+    verificar_folds(len(X))
 
     print("\nTodos os testes passaram!")
 

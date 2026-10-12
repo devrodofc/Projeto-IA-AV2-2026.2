@@ -3,7 +3,7 @@ import numpy as np
 
 from src.utils.dados import carregar_arff
 from src.utils.normalizacao import Padronizador
-from src.regressao.knn import KNNRegressor
+from src.knn import KNN
 
 
 def calcular_mae(y_real, y_previsto):
@@ -95,14 +95,15 @@ def main():
             f"\n========== kNN {distancia.upper()} =========="
         )
 
-        modelo = KNNRegressor(
+        modelo = KNN(
             k=5,
-            distancia=distancia
+            task="regression",
+            distance="euclidean" if distancia == "euclidiana" else "manhattan"
         )
 
         inicio_treino = time.perf_counter()
 
-        modelo.treinar(
+        modelo.fit(
             X_treino,
             y_treino
         )
@@ -113,7 +114,7 @@ def main():
 
         inicio_teste = time.perf_counter()
 
-        previsoes = modelo.prever(
+        previsoes = modelo.predict(
             X_teste
         )
 
@@ -123,7 +124,7 @@ def main():
 
         mae = calcular_mae(
             y_teste,
-            previsoes
+            np.asarray(previsoes)
         )
 
         print(f"k: {modelo.k}")

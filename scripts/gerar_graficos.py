@@ -19,7 +19,6 @@ NOMES_MODELOS = {
     "knn_euclidiana": "kNN Euclidiano",
     "knn_manhattan": "kNN Manhattan",
     "bayes_univariado": "Bayes Univariado",
-    "bayes_multivariado": "Bayes Multivariado",
     "linear": "Regressão Linear"
 }
 

@@ -3,11 +3,11 @@ import sys
 import numpy as np
 
 from src.utils.dados import carregar_arff
-from src.utils.validacao import criar_folds
+from src.utils.validacao import k_fold
 from src.utils.normalizacao import Padronizador
 from src.utils.metricas import avaliar_classificacao
 from src.utils.exportacao import salvar_csv, resumir_resultados
-from src.classificacao.knn import KNNClassificador
+from src.knn import KNN
 
 
 def main():
@@ -29,30 +29,19 @@ def main():
     )
 
     X, y, _ = carregar_arff(
-        "datasets/classificacao/spambase.arff"
+        "datasets/classificacao/autoUniv-au1-1000.arff"
     )
 
-    folds = criar_folds(
-        y,
-        quantidade_folds=5,
-        estratificado=True,
-        semente=42
-    )
+    folds = k_fold(X, y, k=5, random_state=42)
 
     resultados = []
 
-    for numero, (indices_treino, indices_teste) in enumerate(
+    for numero, (X_treino, X_teste, y_treino, y_teste) in enumerate(
         folds,
         start=1
     ):
 
         print(f"\n========== FOLD {numero} ==========", flush=True)
-
-        X_treino = X[indices_treino]
-        y_treino = y[indices_treino]
-
-        X_teste = X[indices_teste]
-        y_teste = y[indices_teste]
 
         padronizador = Padronizador()
 
@@ -64,14 +53,15 @@ def main():
             X_teste
         )
 
-        modelo = KNNClassificador(
+        modelo = KNN(
             k=3,
-            distancia=distancia
+            task="classification",
+            distance="euclidean" if distancia == "euclidiana" else "manhattan"
         )
 
         inicio = time.perf_counter()
 
-        modelo.treinar(X_treino, y_treino)
+        modelo.fit(X_treino, y_treino)
 
         tempo_treinamento = (
             time.perf_counter() - inicio
@@ -79,7 +69,7 @@ def main():
 
         inicio = time.perf_counter()
 
-        previsoes = modelo.prever(X_teste)
+        previsoes = modelo.predict(X_teste)
 
         tempo_teste = (
             time.perf_counter() - inicio

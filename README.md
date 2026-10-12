@@ -28,21 +28,22 @@ O Matplotlib é utilizado exclusivamente para gerar gráficos.
 
 ## 3. Datasets
 
-### 3.1 Classificação: Spambase
+### 3.1 Classificação: AutoUniv-au1-1000
 
-Fonte: OpenML — Dataset ID 44.
+Fonte: OpenML — Dataset ID 1547.
 
-- Instâncias: 4.601
-- Atributos preditores: 57
-- Classes: 2
+- Instâncias: 1.000
+- Atributos preditores: 20 (binários, valores 0 ou 1)
+- Classes: 2 (class1: 25,9%; class2: 74,1%)
 - Tipo de problema: classificação binária
 
-O objetivo é identificar mensagens de spam com base nas
-características numéricas extraídas dos e-mails.
+Dataset artificial gerado pelo AutoUniv (Ray J. Hickey), que
+cria um modelo de classificação aleatório com regras e ruído
+controlados e amostra exemplos rotulados a partir dele.
 
 Arquivo:
 
-`datasets/classificacao/spambase.arff`
+`datasets/classificacao/autoUniv-au1-1000.arff`
 
 ### 3.2 Regressão: Wine Quality
 
@@ -62,8 +63,9 @@ Arquivo:
 
 ### Observação
 
-O dataset AutoUniv foi utilizado em etapas iniciais do
-desenvolvimento, mas não integra os experimentos finais.
+O dataset Spambase (OpenML ID 44) foi utilizado em etapas
+anteriores do desenvolvimento, mas não integra os
+experimentos finais.
 
 ## 4. Algoritmos implementados
 
@@ -92,15 +94,6 @@ independência condicional entre os atributos.
 Os cálculos são realizados no domínio logarítmico
 para maior estabilidade numérica.
 
-**Bayes Multivariado**
-
-Classificador probabilístico gaussiano que utiliza
-uma matriz de covariância por classe para considerar
-relações entre os atributos.
-
-Também utiliza cálculos no domínio logarítmico e
-regularização da matriz de covariância.
-
 ### 4.2 Regressão
 
 **kNN Euclidiano**
@@ -121,9 +114,20 @@ Nos experimentos de regressão foi utilizado k = 5.
 Estima os coeficientes de uma função linear por meio
 do método dos Mínimos Quadrados Ordinários (OLS).
 
-A implementação utiliza operações matriciais do NumPy,
-incluindo a resolução numérica do problema de mínimos
-quadrados.
+Os coeficientes são obtidos pela equação normal com a
+pseudo-inversa de Moore-Penrose:
+β = (XᵀX)⁺ Xᵀ y, onde X inclui uma coluna de 1 para
+o intercepto.
+
+### 4.3 Origem das implementações
+
+O kNN (classe `KNN` em `src/knn.py`, usada tanto para
+classificação quanto para regressão por meio do parâmetro
+`task`), a Regressão Linear Múltipla (classe `MRegression`)
+e o cálculo do R² (função `r_score`) seguem as
+implementações apresentadas em aula pela professora.
+Ao kNN foi adicionado o parâmetro `distance` para permitir
+a distância Manhattan.
 
 ## 5. Pré-processamento
 
@@ -151,14 +155,17 @@ do conjunto de teste durante a padronização.
 
 ## 6. Metodologia experimental
 
-Foi utilizada validação cruzada com cinco folds.
+Foi utilizada validação cruzada K-fold com cinco folds,
+implementada na função `k_fold` (`src/utils/validacao.py`),
+no mesmo estilo do `train_test_split` apresentado em aula.
 
-A semente utilizada na divisão dos dados foi 42.
+A função embaralha os índices com `np.random.permutation`
+(semente 42), divide-os em k partes de tamanho
+`ceil(n / k)` e, em cada iteração, utiliza uma parte
+como teste e as demais como treinamento.
 
-Na classificação, os folds são estratificados para
-preservar aproximadamente a distribuição das classes.
-
-Na regressão, os folds não são estratificados.
+Os folds não são estratificados, tanto na classificação
+quanto na regressão.
 
 Para cada algoritmo são registradas:
 
@@ -263,13 +270,7 @@ python -u -m testes.teste_cv_knn_classificacao manhattan
 Bayes Univariado:
 
 ```bash
-python -u -m testes.teste_cv_bayes_classificacao univariado
-```
-
-Bayes Multivariado:
-
-```bash
-python -u -m testes.teste_cv_bayes_classificacao multivariado
+python -u -m testes.teste_cv_bayes_classificacao
 ```
 
 ### 9.3 Regressão
@@ -303,13 +304,19 @@ As tabelas apresentam médias dos cinco folds.
 
 | Algoritmo | Acurácia | Precisão macro | Recall macro | F1 macro |
 |---|---:|---:|---:|---:|
-| kNN Euclidiano | 0.9115 | 0.9094 | 0.9050 | 0.9069 |
-| kNN Manhattan | 0.9044 | 0.9041 | 0.8948 | 0.8988 |
-| Bayes Univariado | 0.8144 | 0.8267 | 0.8391 | 0.8137 |
-| Bayes Multivariado | 0.8276 | 0.8346 | 0.8491 | 0.8266 |
+| kNN Euclidiano | 0.7140 | 0.6089 | 0.5882 | 0.5935 |
+| kNN Manhattan | 0.7140 | 0.6089 | 0.5882 | 0.5935 |
+| Bayes Univariado | 0.7220 | 0.6080 | 0.5650 | 0.5665 |
 
-O kNN Euclidiano apresentou a maior acurácia média
-e o maior F1 macro médio.
+O Bayes Univariado apresentou a maior acurácia média,
+enquanto os modelos kNN apresentaram o maior F1 macro médio.
+Como as classes são desbalanceadas (74,1% de class2),
+o F1 macro é a métrica mais informativa nesta comparação.
+
+Os kNN Euclidiano e Manhattan obtiveram métricas idênticas.
+Como os atributos são binários, cada atributo contribui com
+uma diferença fixa ou zero, e as duas distâncias tendem a
+selecionar os mesmos vizinhos.
 
 O Bayes Univariado apresentou o menor tempo médio
 de previsão entre os classificadores.
@@ -318,9 +325,9 @@ de previsão entre os classificadores.
 
 | Algoritmo | MAE | R² | R² ajustado |
 |---|---:|---:|---:|
-| Regressão Linear | 0.5698 | 0.2878 | 0.2817 |
-| kNN Euclidiano | 0.5229 | 0.3579 | 0.3524 |
-| kNN Manhattan | 0.5206 | 0.3618 | 0.3563 |
+| Regressão Linear | 0.5695 | 0.2882 | 0.2821 |
+| kNN Euclidiano | 0.5247 | 0.3582 | 0.3527 |
+| kNN Manhattan | 0.5219 | 0.3598 | 0.3543 |
 
 O kNN Manhattan apresentou o menor MAE médio
 e o maior R² médio.
@@ -388,11 +395,10 @@ Projeto-IA-AV2-2026.2/
 │   ├── classificacao/
 │   └── regressao/
 ├── src/
+│   ├── knn.py
 │   ├── classificacao/
-│   │   ├── knn.py
 │   │   └── bayes.py
 │   ├── regressao/
-│   │   ├── knn.py
 │   │   └── regressao_linear.py
 │   └── utils/
 │       ├── dados.py
@@ -416,15 +422,16 @@ Projeto-IA-AV2-2026.2/
 
 ## 14. Conclusão
 
-Nos experimentos realizados, os modelos kNN apresentaram
-melhor desempenho preditivo médio tanto na classificação
-quanto na regressão.
+Nos experimentos realizados, na classificação o Bayes
+Univariado obteve a maior acurácia e os modelos kNN o maior
+F1 macro, com diferenças pequenas. Na regressão, os modelos
+kNN apresentaram o melhor desempenho.
 
-Entretanto, esses modelos exigiram tempos maiores durante
+Os modelos kNN exigiram tempos maiores durante
 a previsão, pois comparam as novas instâncias com exemplos
 armazenados no conjunto de treinamento.
 
-Os algoritmos bayesianos e a regressão linear apresentaram
+O Bayes Univariado e a regressão linear apresentaram
 tempos de previsão menores, demonstrando a importância
 de avaliar simultaneamente qualidade preditiva e
 custo computacional.
