@@ -1,0 +1,907 @@
+<title>Algoritmos do Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: deck 16:9, um slide por vez; slides claros (conceitos) e escuros (resultados), como no deck do Canva.
+   Visual único e deliberado (não segue o tema do visualizador). */
+:root {
+  color-scheme: light;
+  --navy: #071a35;
+  --navy-2: #0b1930;
+  --ink: #102542;
+  --blue: #1769e0;
+  --cyan: #46c8ff;
+  --mint: #55e3b1;
+  --paper: #f4f8ff;
+  --muted: #54708f;
+  --muted-dark: #9fb8d6;
+  --line-light: #dfe9f7;
+  --line-dark: #12335b;
+  --frame-dark: #24568e;
+  --good-dark: #4ade9a;
+  --bad-dark: #ff7a7a;
+  --good-light: #12804a;
+  --bad-light: #c3354a;
+  --stage: #030c1a;
+  --f-display: "Montserrat", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+html, body { height: 100%; }
+body {
+  background: var(--stage);
+  color: var(--ink);
+  font-family: var(--f-body);
+  padding-inline: 16px;
+  padding-block: 16px 72px;
+  box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.deck {
+  width: min(100%, calc((100vh - 104px) * 16 / 9));
+  margin-inline: auto;
+}
+.slide {
+  --u: 1cqw;
+  container-type: inline-size;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.4);
+  padding: calc(var(--u) * 4) calc(var(--u) * 5.7) calc(var(--u) * 3);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--line-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-light) 1px, transparent 1px);
+  background-size: calc(var(--u) * 6.25) calc(var(--u) * 6.25);
+  color: var(--ink);
+  border-radius: 6px;
+}
+.slide.ativo { display: flex; }
+.slide.escuro {
+  background-color: var(--navy);
+  background-image:
+    linear-gradient(var(--line-dark) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-dark) 1px, transparent 1px);
+  color: #fff;
+}
+/* Os tamanhos são escritos em "u" (1% da largura do slide) */
+.slide h2 {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: calc(var(--u) * 3);
+  line-height: 1.05;
+  margin: 0;
+  text-wrap: balance;
+}
+.slide h2::after {
+  content: "";
+  display: block;
+  width: calc(var(--u) * 6.25);
+  height: calc(var(--u) * 0.42);
+  background: var(--blue);
+  margin-top: calc(var(--u) * 1.1);
+}
+.sub { font-size: calc(var(--u) * 1.4); color: var(--cyan); margin: calc(var(--u) * -0.4) 0 0; }
+.slide p, .slide li { font-size: calc(var(--u) * 1.55); line-height: 1.45; margin: 0; }
+.lead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: calc(var(--u) * 2.3) !important;
+  line-height: 1.12 !important;
+  max-width: 62%;
+  text-wrap: balance;
+}
+.rotulo {
+  font-family: var(--f-body);
+  font-weight: 600;
+  font-size: calc(var(--u) * 1.1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin: 0 0 calc(var(--u) * 0.8);
+}
+.escuro .rotulo { color: var(--cyan); }
+.mono { font-family: var(--f-mono); }
+
+.duas { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 3.5); align-items: start; }
+.duas > * { min-width: 0; }
+.caixa {
+  background: #fff;
+  border: 2px solid #b9d4f2;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2.2);
+}
+.escuro .caixa { background: #0b254a; border-color: var(--frame-dark); }
+.faixa {
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--f-mono);
+  font-weight: 600;
+  font-size: calc(var(--u) * 1.5);
+  padding: calc(var(--u) * 1.2) calc(var(--u) * 1.5);
+  letter-spacing: 0.02em;
+}
+.codigo {
+  background: var(--navy-2);
+  color: var(--mint);
+  font-family: var(--f-mono);
+  font-size: calc(var(--u) * 1.45);
+  line-height: 1.5;
+  padding: calc(var(--u) * 2.2) calc(var(--u) * 2.6);
+  margin: 0;
+  white-space: pre;
+  overflow-x: auto;
+}
+.formula {
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--f-mono);
+  font-size: calc(var(--u) * 2.4);
+  text-align: center;
+  padding: calc(var(--u) * 2.4) calc(var(--u) * 2);
+}
+.formula.escura { background: var(--navy-2); }
+.grande { font-family: var(--f-display); font-weight: 800; font-size: calc(var(--u) * 4.4); line-height: 1; margin: 0; }
+.azul { color: var(--blue); }
+.cinza { color: var(--muted); }
+
+/* Capa */
+.capa { flex-direction: row; padding: 0; }
+.capa .texto { flex: 0 0 58%; padding: calc(var(--u) * 6) calc(var(--u) * 5.7); display: flex; flex-direction: column; gap: calc(var(--u) * 1.5); }
+.capa h1 {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: calc(var(--u) * 5.2);
+  line-height: 1.02;
+  margin: calc(var(--u) * 2) 0 0;
+}
+.capa .regua { width: calc(var(--u) * 7); height: calc(var(--u) * 0.5); background: var(--cyan); margin-top: auto; }
+.capa canvas { flex: 1 1 auto; min-width: 0; height: 100%; display: block; }
+
+/* Matriz binária (slide do AutoUniv) */
+.bits { display: grid; grid-template-columns: repeat(21, 1fr); gap: 2px; background: var(--navy); padding: calc(var(--u) * 1.2); }
+.bits span { aspect-ratio: 1; background: #0e2c55; }
+.bits span.um { background: var(--cyan); }
+.bits span.c1, .bits span.c2 { font-family: var(--f-mono); font-size: calc(var(--u) * 0.75); color: #fff; display: grid; place-items: center; aspect-ratio: auto; }
+.bits span.c1 { background: #e0457b; }
+.bits span.c2 { background: var(--blue); }
+.legenda { font-size: calc(var(--u) * 1.05) !important; color: var(--muted); margin-top: calc(var(--u) * 0.6) !important; }
+
+/* Folds */
+.folds { display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--u) * 2); }
+.fold { text-align: center; display: grid; gap: calc(var(--u) * 0.8); }
+.fold b { font-family: var(--f-mono); color: var(--blue); font-size: calc(var(--u) * 1.15); }
+.fold span {
+  border: 2px solid var(--blue);
+  border-radius: 8px;
+  padding: calc(var(--u) * 2) 0;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: calc(var(--u) * 1.5);
+  background: #fff;
+}
+.fold.teste span { background: var(--blue); color: #fff; }
+
+/* ---------- Painel interativo ---------- */
+.controles { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1.4) calc(var(--u) * 3); align-items: end; }
+.controle { display: grid; gap: calc(var(--u) * 0.4); min-width: 0; }
+.controle label { font-size: calc(var(--u) * 1.05); color: var(--muted-dark); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+.controle output { font-family: var(--f-mono); font-size: calc(var(--u) * 1.6); color: #fff; font-weight: 600; }
+.controle .linha { display: flex; align-items: center; gap: calc(var(--u) * 1); }
+input[type="range"] { width: calc(var(--u) * 20); accent-color: var(--cyan); cursor: pointer; }
+.pilulas { display: inline-flex; border: 1px solid var(--frame-dark); }
+.pilulas button, .btn {
+  font: 600 calc(var(--u) * 1.05) var(--f-body);
+  color: var(--muted-dark);
+  background: transparent;
+  border: 0;
+  padding: calc(var(--u) * 0.55) calc(var(--u) * 1.1);
+  cursor: pointer;
+}
+.pilulas button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+.btn { border: 1px solid var(--frame-dark); }
+.btn:hover, .pilulas button:hover { color: #fff; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+.tabela-wrap { overflow-x: auto; border: 2px solid var(--frame-dark); background: var(--navy-2); }
+table.res { border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.08); font-variant-numeric: tabular-nums; }
+table.res th, table.res td { text-align: left; padding: calc(var(--u) * 0.75) calc(var(--u) * 1.1); white-space: nowrap; vertical-align: top; }
+table.res thead th { color: var(--muted-dark); font-weight: 600; border-bottom: 1px solid var(--line-dark); font-size: calc(var(--u) * 0.95); letter-spacing: 0.04em; }
+table.res tbody tr + tr td { border-top: 1px solid var(--line-dark); }
+table.res td:first-child { color: #fff; font-weight: 600; }
+table.res td small { display: block; font-size: calc(var(--u) * 0.85); color: var(--muted-dark); }
+.d { display: block; font-size: calc(var(--u) * 0.85); }
+.d.bom { color: var(--good-dark); }
+.d.ruim { color: var(--bad-dark); }
+.d.igual { color: var(--muted-dark); }
+
+.analise { display: grid; grid-template-columns: 1.15fr 1fr; gap: calc(var(--u) * 2.4); min-height: 0; flex: 1 1 auto; }
+.analise > * { min-width: 0; }
+.grafico { background: var(--navy-2); border: 2px solid var(--frame-dark); padding: calc(var(--u) * 1) calc(var(--u) * 1.2) calc(var(--u) * 0.6); display: flex; flex-direction: column; gap: calc(var(--u) * 0.4); }
+.grafico .topo { display: flex; justify-content: space-between; align-items: center; gap: calc(var(--u) * 1); flex-wrap: wrap; }
+.grafico .chaves { display: flex; gap: calc(var(--u) * 1.4); font-size: calc(var(--u) * 0.95); color: var(--muted-dark); flex-wrap: wrap; }
+.chave::before { content: ""; display: inline-block; width: calc(var(--u) * 1.6); height: 3px; vertical-align: middle; margin-right: calc(var(--u) * 0.45); background: currentColor; }
+.chave.tracejada::before { background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); }
+.grafico svg { width: 100%; height: auto; display: block; }
+.duplo { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 1); }
+.duplo > * { min-width: 0; }
+.mini-titulo { font-size: calc(var(--u) * 0.95); color: var(--muted-dark); margin: 0 0 2px; }
+
+.veredito { display: grid; gap: calc(var(--u) * 0.9); align-content: start; }
+.veredito h3 { font-family: var(--f-display); font-size: calc(var(--u) * 1.35); margin: 0; color: #fff; }
+.item {
+  border-left: calc(var(--u) * 0.35) solid var(--frame-dark);
+  background: #0b254a;
+  padding: calc(var(--u) * 0.7) calc(var(--u) * 1.1);
+  font-size: calc(var(--u) * 1.1);
+  line-height: 1.35;
+}
+.item.bom { border-left-color: var(--good-dark); }
+.item.ruim { border-left-color: var(--bad-dark); }
+.item b { font-weight: 600; }
+.item .tag { font-family: var(--f-mono); font-size: calc(var(--u) * 0.95); }
+.item.bom .tag { color: var(--good-dark); }
+.item.ruim .tag { color: var(--bad-dark); }
+.item .melhor { display: block; color: var(--muted-dark); font-size: calc(var(--u) * 0.95); }
+.nota { font-size: calc(var(--u) * 0.95) !important; color: var(--muted-dark); }
+
+svg .eixo { stroke: var(--line-dark); stroke-width: 1; }
+svg .rot { fill: var(--muted-dark); font-family: var(--f-mono); font-size: 11px; }
+svg .marca { stroke: var(--cyan); stroke-width: 1.5; stroke-dasharray: 3 3; }
+svg .base { stroke: #e0a93b; stroke-width: 1.5; stroke-dasharray: 6 4; }
+svg .rotbase { fill: #e0a93b; font-family: var(--f-mono); font-size: 10.5px; }
+
+/* Resumo de hiperparâmetros */
+.licoes { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 2); }
+.licoes > * { min-width: 0; }
+.licoes h3 { font-family: var(--f-display); font-size: calc(var(--u) * 1.5); margin: 0 0 calc(var(--u) * 0.8); color: #fff; }
+.licoes p { font-size: calc(var(--u) * 1.25) !important; color: #dbe7f6; }
+.licoes .num { font-family: var(--f-mono); color: var(--cyan); }
+.fecho { font-family: var(--f-display); font-weight: 700; font-size: calc(var(--u) * 1.9) !important; text-align: center; text-wrap: balance; }
+
+.refs p { font-size: calc(var(--u) * 1.35) !important; color: #e6eef9; }
+.rodape { margin-top: auto; text-align: center; font-family: var(--f-mono); color: var(--cyan); font-size: calc(var(--u) * 1.25) !important; border-top: 1px solid var(--frame-dark); padding-top: calc(var(--u) * 1.6); }
+
+/* Navegação */
+.nav {
+  position: fixed; inset-inline: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--stage);
+  color: #cfe0f5;
+  font: 600 14px var(--f-body);
+}
+.nav button { font: 600 15px var(--f-body); color: #fff; background: #0e2c55; border: 1px solid var(--frame-dark); padding: 7px 16px; cursor: pointer; }
+.nav button:disabled { opacity: 0.35; cursor: default; }
+.nav .cont { font-family: var(--f-mono); min-width: 7ch; text-align: center; }
+.nav .tit { color: var(--muted-dark); max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Tela estreita: os slides viram uma página rolável */
+@media (max-width: 760px) {
+  body { padding-block: 16px; }
+  .deck { width: 100%; display: grid; gap: 16px; }
+  .slide { display: flex !important; aspect-ratio: auto; --u: 9px; padding: 28px 18px; }
+  .capa { flex-direction: column; }
+  .capa .texto { padding: 0; }
+  .capa canvas { height: 180px; flex: none; }
+  .duas, .analise, .licoes, .duplo { grid-template-columns: 1fr; }
+  .lead { max-width: none; }
+  .folds { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .bits { grid-template-columns: repeat(21, minmax(0, 1fr)); }
+  input[type="range"] { width: 100%; }
+  .controle { width: 100%; }
+  .nav { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .slide.ativo { animation: entra 0.25s ease-out; }
+  @keyframes entra { from { opacity: 0.6; } to { opacity: 1; } }
+}
+</style>
+
+<main class="deck" id="deck">
+
+<!-- 1 -->
+<section class="slide capa" data-titulo="Capa">
+  <div class="texto">
+    <p class="rotulo" style="letter-spacing:0.22em">Trabalho AV2</p>
+    <h1>Inteligência Artificial Computacional</h1>
+    <p style="color:var(--muted);font-size:calc(var(--u)*1.75)">Aprendizado de Máquina: Classificação e Regressão</p>
+    <div class="regua"></div>
+    <p>Alunos: Rodrigo Herrmann e Gustavo Furtado<br>Professora: Dra. Cynthia Moreira Maia — UNIFOR<br>Python + NumPy</p>
+  </div>
+  <canvas id="rede" aria-hidden="true"></canvas>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-titulo="Introdução">
+  <h2>1. Introdução</h2>
+  <p class="lead">Objetivo: comparar algoritmos supervisionados implementados do zero em um problema de classificação e um de regressão do OpenML.</p>
+  <div class="duas" style="margin-top:auto">
+    <div class="caixa">
+      <p class="rotulo">O que comparamos</p>
+      <p>Classificação: kNN (Euclidiana e Manhattan) e Bayes Univariado.</p>
+      <p style="margin-top:calc(var(--u)*1.2)">Regressão: kNN (Euclidiana e Manhattan) e Regressão Linear Múltipla.</p>
+    </div>
+    <div class="caixa">
+      <p class="rotulo">Por que importa</p>
+      <p>Escolher um modelo exige equilibrar qualidade preditiva e custo computacional (tempo de treino e de teste). Implementar do zero, expõe a matemática de cada método.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-titulo="Banco de dados — Classificação">
+  <h2>3.1 Banco de Dados — Classificação</h2>
+  <div class="duas" style="align-items:center;flex:1">
+    <div style="display:grid;gap:calc(var(--u)*1.6)">
+      <div>
+        <p class="grande azul">AutoUniv-au1-1000</p>
+        <p class="mono cinza" style="font-size:calc(var(--u)*1.4)">OpenML ID 1547</p>
+      </div>
+      <p>Dataset artificial do gerador AutoUniv (Ray J. Hickey): regras aleatórias com ruído controlado geram exemplos rotulados. Atributos binários (0/1), sem valores ausentes. Classes desbalanceadas: class1 = 25,9% e class2 = 74,1%.</p>
+      <div class="faixa">1.000 AMOSTRAS · 20 ATRIBUTOS · 2 CLASSES</div>
+    </div>
+    <div>
+      <div class="bits" id="bits" role="img" aria-label="As 12 primeiras amostras do dataset: 20 atributos binários e a classe"></div>
+      <p class="legenda">As 12 primeiras linhas reais do arquivo: cada quadrado é um atributo (azul-claro = 1), a última coluna é a classe.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-titulo="Banco de dados — Regressão">
+  <h2>3.1 Banco de Dados — Regressão</h2>
+  <div class="duas" style="align-items:center;flex:1">
+    <div>
+      <svg id="qualidade" viewBox="0 0 520 330" role="img" aria-label="Distribuição das notas de qualidade do Wine Quality"></svg>
+      <p class="legenda">Quantidade de vinhos por nota de qualidade (6.497 amostras).</p>
+    </div>
+    <div style="display:grid;gap:calc(var(--u)*1.6)">
+      <div>
+        <p class="grande">Wine Quality</p>
+        <p class="mono azul" style="font-size:calc(var(--u)*1.4)">OpenML ID 287</p>
+      </div>
+      <p>Prever a nota de qualidade (3 a 9) de vinhos a partir de 11 medidas físico-químicas: acidez, açúcar, cloretos, SO₂, densidade, pH, sulfatos, álcool etc.</p>
+      <p class="cinza" style="border-top:3px solid var(--cyan);padding-top:calc(var(--u)*1.2);font-size:calc(var(--u)*1.3)">6.497 AMOSTRAS · 11 ATRIBUTOS · alvo quality (média 5,82 ± 0,87)<br>Cortez et al., 2009</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-titulo="Algoritmos — kNN">
+  <h2>2. Algoritmos — kNN</h2>
+  <div class="duas" style="flex:1">
+    <div style="display:grid;gap:calc(var(--u)*2)">
+      <p class="grande" style="font-size:calc(var(--u)*4)">k vizinhos.<br>Uma decisão.</p>
+      <div>
+        <p>Euclidiana: d(X,Y) = √Σ (xᵢ − yᵢ)²</p>
+        <p>Manhattan: d(X,Y) = Σ |xᵢ − yᵢ|</p>
+        <p>Classificação: voto majoritário dos k = 3 vizinhos.</p>
+        <p>Regressão: média dos k = 5 vizinhos.</p>
+        <p>Modelo “preguiçoso”: o treino só armazena os dados; o custo está na previsão.</p>
+      </div>
+    </div>
+    <pre class="codigo"># classe KNN da aula
+# + parâmetro distance
+model = KNN(k=3,
+    task='classification',
+    distance='manhattan')
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)</pre>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-titulo="Algoritmos — Bayes Univariado">
+  <h2>2. Algoritmos — Classificador Bayesiano Univariado</h2>
+  <p class="grande" style="font-size:calc(var(--u)*2.7)">Uma normal por atributo, por classe.</p>
+  <div>
+    <p>Densidade normal univariada: p(x) = 1/(√(2π)·σ) · exp[−½((x − μ)/σ)²]</p>
+    <p>Treino: estima a priori P(Cₖ), a média μ e a variância σ² de cada atributo por classe (assume independência condicional). Uma pequena regularização é somada à variância para evitar σ² = 0.</p>
+    <p>Previsão: classe com maior log P(Cₖ) + Σ log p(xⱼ | Cₖ). O logaritmo evita underflow numérico.</p>
+  </div>
+  <div class="formula" style="margin-top:auto">P(Cₖ | x) ∝ P(Cₖ) · ∏ⱼ 𝒩(xⱼ ; μₖⱼ, σ²ₖⱼ)</div>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-titulo="Algoritmos — Regressão Linear Múltipla">
+  <h2>2. Algoritmos — Regressão Linear Múltipla</h2>
+  <div class="duas" style="flex:1">
+    <div style="display:grid;gap:calc(var(--u)*1.6)">
+      <p class="grande" style="font-size:calc(var(--u)*2.2)">Solução fechada, com estabilidade numérica.</p>
+      <p>Modelo: ŷ = β₀ + β₁x₁ + … + βₚxₚ, com uma coluna de 1s em X para o intercepto.</p>
+      <p>A classe MRegression da aula resolve a equação normal com a pseudo-inversa de Moore–Penrose (np.linalg.pinv), que funciona mesmo quando XᵀX não é invertível.</p>
+      <p>Modelo paramétrico: o treino calcula β uma vez; a previsão é só um produto matricial. Não tem hiperparâmetro para ajustar.</p>
+    </div>
+    <div style="display:grid;gap:calc(var(--u)*2.4)">
+      <div class="formula" style="font-size:calc(var(--u)*3.4)">ŷ = Xβ</div>
+      <div class="formula escura" style="font-size:calc(var(--u)*3)">β = (XᵀX)⁺ Xᵀy</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-titulo="Validação cruzada K-Fold">
+  <h2>3. Experimentos — Validação Cruzada K-Fold (k = 5)</h2>
+  <div class="folds" style="margin-top:calc(var(--u)*2)">
+    <div class="fold teste"><b>FOLD 1</b><span>TESTE</span></div>
+    <div class="fold"><b>FOLD 2</b><span>TREINO</span></div>
+    <div class="fold"><b>FOLD 3</b><span>TREINO</span></div>
+    <div class="fold"><b>FOLD 4</b><span>TREINO</span></div>
+    <div class="fold"><b>FOLD 5</b><span>TREINO</span></div>
+  </div>
+  <p style="text-align:center;max-width:none">Função k_fold no estilo do train_test_split da aula (np.random.seed, np.random.permutation, math.ceil). Em cada fold: padronização Z-score ajustada só no treino → treino → teste. Para cada algoritmo: média ± desvio-padrão das métricas nos 5 folds e tempos de treino e de teste.</p>
+  <div class="codigo" style="text-align:center;margin:auto auto 0;white-space:normal">seed 42 → permutation → 5 partições → 100% dos dados testados uma vez</div>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-titulo="Métricas">
+  <h2>3.2 Métricas de Avaliação</h2>
+  <div class="duas" style="flex:1">
+    <div class="caixa mono">
+      <p class="rotulo">Classificação</p>
+      <p>Acurácia = (VP + VN) / N</p>
+      <p>Precisão = VP / (VP + FP)</p>
+      <p>Recall = VP / (VP + FN)</p>
+      <p>F1 = 2 · P · R / (P + R)</p>
+      <p class="cinza" style="font-family:var(--f-body);font-size:calc(var(--u)*1.2);margin-top:calc(var(--u)*1.2)">Precisão, recall e F1 são médias macro entre as classes.</p>
+    </div>
+    <div class="caixa mono">
+      <p class="rotulo">Regressão</p>
+      <p>MAE = (1/n) Σ |yᵢ − ŷᵢ|</p>
+      <p>R² = 1 − SSres / SStot</p>
+      <p>R²aj = 1 − (1 − R²)(n − 1)/(n − p − 1)</p>
+    </div>
+  </div>
+  <p class="cinza" style="text-align:center;font-size:calc(var(--u)*1.25)">Todas implementadas manualmente com NumPy.</p>
+</section>
+
+<!-- 10 -->
+<section class="slide escuro" id="s10" data-titulo="Resultados de Classificação">
+  <h2>3.3 Resultados de Classificação</h2>
+  <p class="sub">AutoUniv-au1-1000 · média ± desvio-padrão em 5 folds · mova os controles para ver o efeito dos hiperparâmetros</p>
+  <div class="controles">
+    <div class="controle">
+      <label for="kc">k do kNN</label>
+      <div class="linha"><input type="range" id="kc" min="0" max="9" step="1" value="1"><output id="kc-out" for="kc">k = 3</output></div>
+    </div>
+    <div class="controle">
+      <label for="rc">Regularização do Bayes (somada à variância)</label>
+      <div class="linha"><input type="range" id="rc" min="0" max="6" step="1" value="0"><output id="rc-out" for="rc">1e-9</output></div>
+    </div>
+    <button class="btn" id="cls-padrao" type="button">Voltar aos valores do trabalho</button>
+  </div>
+  <div class="tabela-wrap">
+    <table class="res">
+      <thead><tr><th>CLASSIFICADOR</th><th>ACURÁCIA</th><th>PRECISÃO</th><th>RECALL</th><th>F1-SCORE</th><th>TREINO (s)</th><th>TESTE (s)*</th></tr></thead>
+      <tbody id="cls-corpo"></tbody>
+    </table>
+  </div>
+  <div class="analise">
+    <div class="grafico">
+      <div class="topo">
+        <div class="chaves">
+          <span class="chave" style="color:var(--cyan)">Acurácia</span>
+          <span class="chave" style="color:var(--mint)">F1 macro</span>
+          <span class="chave tracejada" style="color:#e0a93b">Sempre a classe majoritária</span>
+        </div>
+        <div class="pilulas" role="group" aria-label="Distância do gráfico">
+          <button type="button" data-dist="euclidiana" aria-pressed="true">Euclidiana</button>
+          <button type="button" data-dist="manhattan" aria-pressed="false">Manhattan</button>
+        </div>
+      </div>
+      <svg id="graf-cls" viewBox="0 0 560 230" role="img" aria-label="Acurácia e F1 do kNN conforme k"></svg>
+    </div>
+    <div class="veredito" id="ver-cls"></div>
+  </div>
+  <p class="nota">* Tempo medido na configuração do trabalho. No kNN, o tempo de teste quase não muda com k: o custo é calcular e ordenar as distâncias para todo o treino.</p>
+</section>
+
+<!-- 11 -->
+<section class="slide escuro" id="s11" data-titulo="Resultados de Regressão">
+  <h2>3.3 Resultados de Regressão</h2>
+  <p class="sub">Wine Quality · média ± desvio-padrão em 5 folds · mova o controle para ver o efeito de k</p>
+  <div class="controles">
+    <div class="controle">
+      <label for="kr">k do kNN</label>
+      <div class="linha"><input type="range" id="kr" min="0" max="9" step="1" value="2"><output id="kr-out" for="kr">k = 5</output></div>
+    </div>
+    <div class="pilulas" role="group" aria-label="Distância do gráfico">
+      <button type="button" data-dist="euclidiana" aria-pressed="false">Euclidiana</button>
+      <button type="button" data-dist="manhattan" aria-pressed="true">Manhattan</button>
+    </div>
+    <button class="btn" id="reg-padrao" type="button">Voltar aos valores do trabalho</button>
+  </div>
+  <div class="tabela-wrap">
+    <table class="res">
+      <thead><tr><th>REGRESSOR</th><th>MAE</th><th>R²</th><th>R² AJUSTADO</th><th>TREINO (s)</th><th>TESTE (s)*</th></tr></thead>
+      <tbody id="reg-corpo"></tbody>
+    </table>
+  </div>
+  <div class="analise">
+    <div class="grafico">
+      <div class="duplo">
+        <div><p class="mini-titulo">MAE (menor é melhor)</p><svg id="graf-mae" viewBox="0 0 300 210" role="img" aria-label="MAE do kNN conforme k"></svg></div>
+        <div><p class="mini-titulo">R² (maior é melhor)</p><svg id="graf-r2" viewBox="0 0 300 210" role="img" aria-label="R² do kNN conforme k"></svg></div>
+      </div>
+      <div class="chaves">
+        <span class="chave" style="color:var(--cyan)">kNN com a distância escolhida</span>
+        <span class="chave tracejada" style="color:#e0a93b">Regressão Linear (sem hiperparâmetro)</span>
+      </div>
+    </div>
+    <div class="veredito" id="ver-reg"></div>
+  </div>
+  <p class="nota">* Tempo medido na configuração do trabalho; no kNN ele quase não depende de k.</p>
+</section>
+
+<!-- 12 -->
+<section class="slide escuro" data-titulo="Análise crítica">
+  <h2>Análise Crítica: Desempenho vs. Eficiência</h2>
+  <div class="duas">
+    <div class="caixa">
+      <p class="rotulo">Classificadores (acurácia e F1)</p>
+      <p>Acurácia: Bayes 0.722 ≈ kNN 0.714.</p>
+      <p>F1 macro: kNN 0.593 &gt; Bayes 0.566. O kNN acerta mais a classe minoritária.</p>
+      <p>Teste: Bayes 0.004 s vs. kNN ~0.45 s (≈100× mais rápido).</p>
+    </div>
+    <div class="caixa">
+      <p class="rotulo">Regressores (R² e MAE)</p>
+      <p>kNN Manhattan: MAE 0.522 e R² 0.360.</p>
+      <p>Regressão Linear: MAE 0.570 e R² 0.288.</p>
+      <p>Teste: Linear &lt; 1 ms vs. kNN ~18–20 s por fold; treino do kNN ≈ 0 s (só armazena).</p>
+    </div>
+  </div>
+  <p class="fecho" style="margin-top:auto">kNN: simples e sem suposições sobre os dados, mas a previsão escala mal com o tamanho do treino. Bayes e Regressão Linear: rápidos e interpretáveis, mas assumem independência entre atributos e relação linear.</p>
+</section>
+
+<!-- 13 -->
+<section class="slide escuro" data-titulo="Ajuste de hiperparâmetros">
+  <h2>Ajuste de Hiperparâmetros: aumentar sempre ajuda?</h2>
+  <p class="sub">Não. Cada métrica tem seu melhor valor, e passar dele piora o modelo.</p>
+  <div class="licoes">
+    <div class="caixa">
+      <h3>k do kNN · classificação</h3>
+      <p>A acurácia sobe até k = 15 (<span class="num">0.768</span>), mas o F1 cai de <span class="num">0.604</span> (k = 5) para <span class="num">0.442</span> (k = 51).</p>
+      <p style="margin-top:calc(var(--u)*0.8)">Com k grande o voto é dominado pela classe majoritária (74%): o modelo acerta mais por “chutar” class2 e esquece a class1. <b>Melhor k pelo F1: 5.</b></p>
+    </div>
+    <div class="caixa">
+      <h3>k do kNN · regressão</h3>
+      <p>O R² sobe de <span class="num">0.21</span> (k = 1) até <span class="num">0.369</span> (k = 11, Manhattan) e depois cai: média de vizinhos demais suaviza a previsão.</p>
+      <p style="margin-top:calc(var(--u)*0.8)">O MAE é menor em k = 1 (<span class="num">0.441</span>) porque copia notas inteiras: acerta muitas exatamente e erra feio as outras, o que o R² penaliza. <b>Melhor k pelo R²: 7 a 11.</b></p>
+    </div>
+    <div class="caixa">
+      <h3>Regularização do Bayes</h3>
+      <p>Até <span class="num">0.01</span> não muda nada. Com <span class="num">1</span> ou mais, a acurácia vai para <span class="num">0.741</span>, igual a prever sempre class2, e o F1 cai para <span class="num">0.43</span>.</p>
+      <p style="margin-top:calc(var(--u)*0.8)">Variância inflada demais apaga as diferenças entre as classes. <b>Melhor: manter pequena (1e-9).</b></p>
+    </div>
+  </div>
+  <p class="fecho" style="margin-top:auto">Aumentar k reduz a variância e aumenta o viés. O ponto ótimo depende da métrica escolhida, por isso a métrica deve ser definida antes de ajustar.</p>
+</section>
+
+<!-- 14 -->
+<section class="slide escuro" data-titulo="Conclusões">
+  <h2>4. Conclusões</h2>
+  <div class="duas" style="grid-template-columns:0.8fr 1.2fr;flex:1">
+    <div style="display:grid;gap:calc(var(--u)*3);align-content:start">
+      <p class="grande" style="font-size:calc(var(--u)*3.3);line-height:1.1">Melhor equilíbrio: Bayes Univariado e Regressão Linear.</p>
+      <div style="height:calc(var(--u)*0.7);background:var(--cyan);width:85%"></div>
+    </div>
+    <div style="display:grid;gap:calc(var(--u)*1.3);color:#e6f0fb">
+      <p>Melhor desempenho: kNN no F1 da classificação (0.593; 0.604 com k = 5) e kNN Manhattan na regressão (MAE 0.522, R² 0.360; R² 0.369 com k = 11).</p>
+      <p>Mais rápidos: Bayes Univariado (0.004 s de teste) e Regressão Linear (&lt; 1 ms).</p>
+      <p>Vale a pena? Na classificação, o Bayes entrega acurácia equivalente ~100× mais rápido. Na regressão, o kNN ganha +0.07 de R² ao custo de ~18 s por fold; compensa só se a previsão não precisar ser em tempo real.</p>
+      <p>Limitações: dataset de classificação artificial, ruidoso e desbalanceado (prever sempre a classe majoritária daria 0.741 de acurácia); R² moderado no Wine Quality; k escolhido sem validação aninhada.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide escuro refs" data-titulo="Referências">
+  <h2>5. Referências</h2>
+  <div style="display:grid;gap:calc(var(--u)*1.4)">
+    <p>OPENML. Dataset 1547 (AutoUniv-au1-1000) e Dataset 287 (Wine Quality). Disponível em: https://www.openml.org/</p>
+    <p>CORTEZ, P. et al. Modeling wine preferences by data mining from physicochemical properties. Decision Support Systems, 47(4), 547–553, 2009.</p>
+    <p>HARRIS, C. R. et al. Array programming with NumPy. Nature, 585, 357–362, 2020.</p>
+    <p>BISHOP, C. M. Pattern Recognition and Machine Learning. Springer, 2006.</p>
+    <p>MAIA, C. M. Material e códigos da disciplina Inteligência Artificial Computacional (kNN, regressão linear múltipla, hold-out). UNIFOR – CCT, 2026.</p>
+  </div>
+  <p class="rodape">Python + NumPy · sem scikit-learn · sem pandas</p>
+</section>
+
+</main>
+
+<nav class="nav" aria-label="Navegação dos slides">
+  <button type="button" id="ant" aria-label="Slide anterior">‹ Anterior</button>
+  <span class="cont" id="cont">1 / 15</span>
+  <button type="button" id="prox" aria-label="Próximo slide">Próximo ›</button>
+  <span class="tit" id="tit"></span>
+</nav>
+
+<script id="dados" type="application/json">{"valores_k":[1,3,5,7,9,11,15,21,31,51],"valores_regularizacao":["1e-09","1e-06","0.001","0.01","0.1","1.0","10.0"],"classificacao":{"knn_euclidiana":{"1":{"acuracia":[0.6910000000000001,0.015572411502397394],"precisao_macro":[0.5967133543843113,0.023001318556047843],"recall_macro":[0.5950137423785725,0.021592453338788793],"f1_macro":[0.5946177499152384,0.02133027942844402]},"3":{"acuracia":[0.714,0.026786190471957735],"precisao_macro":[0.6088537079749634,0.0291006907364625],"recall_macro":[0.5882432162347477,0.017052291670652742],"f1_macro":[0.5934973912705118,0.01968008874422589]},"5":{"acuracia":[0.743,0.018574175621006727],"precisao_macro":[0.6473690034940999,0.024964129785566294],"recall_macro":[0.596058157558925,0.01104762727303194],"f1_macro":[0.6036495162175425,0.014376907890936624]},"7":{"acuracia":[0.743,0.030536862969204968],"precisao_macro":[0.6396702195321387,0.03854046210205122],"recall_macro":[0.5813357446752013,0.03423333942873443],"f1_macro":[0.5840718928082544,0.04407183830511888]},"9":{"acuracia":[0.753,0.025149552679918606],"precisao_macro":[0.6641818271831981,0.03404659936605923],"recall_macro":[0.5795059600768008,0.02876825436702629],"f1_macro":[0.5810574749791995,0.037524330915815904]},"11":{"acuracia":[0.754,0.017102631376487085],"precisao_macro":[0.6643737219976288,0.05306230060965829],"recall_macro":[0.5749590244823717,0.035331595815498024],"f1_macro":[0.5731956289419189,0.047300212014029334]},"15":{"acuracia":[0.768,0.029706901555025922],"precisao_macro":[0.7443487120454446,0.07038317612613229],"recall_macro":[0.5719567983741246,0.03187851689702962],"f1_macro":[0.5650365282520065,0.04693302261034735]},"21":{"acuracia":[0.7579999999999999,0.027973201461398752],"precisao_macro":[0.7418594587088625,0.0780004858298811],"recall_macro":[0.5466986357346417,0.015112712185875234],"f1_macro":[0.5230172060714517,0.025662087068016867]},"31":{"acuracia":[0.7489999999999999,0.027018512172212617],"precisao_macro":[0.710485460877049,0.07499026848178707],"recall_macro":[0.5256152537079966,0.012963353022259717],"f1_macro":[0.4834525055543816,0.025084384403664572]},"51":{"acuracia":[0.7450000000000001,0.025495097567963948],"precisao_macro":[0.5720242711017014,0.27576436553713507],"recall_macro":[0.5081373646883166,0.013824106364242052],"f1_macro":[0.4419776802715223,0.03143092018182476]}},"knn_manhattan":{"1":{"acuracia":[0.6910000000000001,0.015572411502397394],"precisao_macro":[0.5967133543843113,0.023001318556047843],"recall_macro":[0.5950137423785725,0.021592453338788793],"f1_macro":[0.5946177499152384,0.02133027942844402]},"3":{"acuracia":[0.714,0.026786190471957735],"precisao_macro":[0.6088537079749634,0.0291006907364625],"recall_macro":[0.5882432162347477,0.017052291670652742],"f1_macro":[0.5934973912705118,0.01968008874422589]},"5":{"acuracia":[0.743,0.021095023109729005],"precisao_macro":[0.6478392938320907,0.028764468815219785],"recall_macro":[0.5960259647701097,0.011920538655292743],"f1_macro":[0.6037069924193602,0.01571809995561738]},"7":{"acuracia":[0.744,0.031503968004046756],"precisao_macro":[0.6416130390344387,0.0410294701644797],"recall_macro":[0.582002411341868,0.035272364986800274],"f1_macro":[0.5849551264860283,0.04540209456354584]},"9":{"acuracia":[0.752,0.02361143790623521],"precisao_macro":[0.6622240349754059,0.029852143817436505],"recall_macro":[0.5775059600768009,0.024395537700774933],"f1_macro":[0.5786651855685051,0.032268144969937185]},"11":{"acuracia":[0.754,0.018506755523321764],"precisao_macro":[0.6666296955779772,0.05366854812149708],"recall_macro":[0.5749219754387,0.034351132159271575],"f1_macro":[0.5730987395435929,0.04622269875050079]},"15":{"acuracia":[0.767,0.029706901555025922],"precisao_macro":[0.7375635554366451,0.07472604758518817],"recall_macro":[0.5712945467184956,0.032444538765709144],"f1_macro":[0.564353157325755,0.047479618219572146]},"21":{"acuracia":[0.756,0.026076809620810618],"precisao_macro":[0.7368900782893693,0.07176469287481052],"recall_macro":[0.5426578194081111,0.010097384031983583],"f1_macro":[0.5161783363310388,0.017072168012292357]},"31":{"acuracia":[0.75,0.027613402542968176],"precisao_macro":[0.7356071846934792,0.10761579299380729],"recall_macro":[0.5262819203746634,0.013115757649982303],"f1_macro":[0.4839903129422976,0.025186405272480356]},"51":{"acuracia":[0.7450000000000001,0.025495097567963948],"precisao_macro":[0.5720242711017014,0.27576436553713507],"recall_macro":[0.5081373646883166,0.013824106364242052],"f1_macro":[0.4419776802715223,0.03143092018182476]}},"bayes":{"1e-09":{"acuracia":[0.7220000000000001,0.041922547632509154],"precisao_macro":[0.6079519874431261,0.06836183502284532],"recall_macro":[0.5649816607833053,0.03620108814103881],"f1_macro":[0.5664740630705878,0.043582556235418894]},"1e-06":{"acuracia":[0.7220000000000001,0.041922547632509154],"precisao_macro":[0.6079519874431261,0.06836183502284532],"recall_macro":[0.5649816607833053,0.03620108814103881],"f1_macro":[0.5664740630705878,0.043582556235418894]},"0.001":{"acuracia":[0.7220000000000001,0.041922547632509154],"precisao_macro":[0.6079519874431261,0.06836183502284532],"recall_macro":[0.5649816607833053,0.03620108814103881],"f1_macro":[0.5664740630705878,0.043582556235418894]},"0.01":{"acuracia":[0.7220000000000001,0.04221966366516909],"precisao_macro":[0.607595916924919,0.0679162738225526],"recall_macro":[0.5636352555545472,0.03494431958273067],"f1_macro":[0.5648837859286959,0.04206381347532054]},"0.1":{"acuracia":[0.724,0.0435028734683124],"precisao_macro":[0.6045233948755573,0.07227311233338009],"recall_macro":[0.5540877703623602,0.035527586784647784],"f1_macro":[0.5511446375849239,0.04521275691267518]},"1.0":{"acuracia":[0.735,0.024238399287081665],"precisao_macro":[0.44522854970948594,0.12037148910569616],"recall_macro":[0.49878087116707526,0.006362325900898183],"f1_macro":[0.4312235989218104,0.01744690500446276]},"10.0":{"acuracia":[0.741,0.022192341021172166],"precisao_macro":[0.3705,0.011096170510586083],"recall_macro":[0.5,0.0],"f1_macro":[0.42554257859291267,0.007343349219600362]}},"baseline_acuracia":0.741},"regressao":{"knn_euclidiana":{"1":{"mae":[0.4538915841290552,0.014950324765053249],"r2":[0.18463504134419143,0.0503084346244551],"r2_ajustado":[0.177668500177549,0.05073374215801327]},"3":{"mae":[0.5162381827886838,0.007366592831299827],"r2":[0.32026285209900573,0.023022105733888205],"r2_ajustado":[0.31445493070504116,0.02321880623931274]},"5":{"mae":[0.524698890931736,0.006080300280276103],"r2":[0.35820895593121405,0.01557966184121024],"r2_ajustado":[0.352725329804922,0.015709317349952876]},"7":{"mae":[0.5301953790234438,0.006877606555517388],"r2":[0.366404606637088,0.014042263617324116],"r2_ajustado":[0.3609909900132483,0.014159385163085972]},"9":{"mae":[0.5351296417109832,0.007840389595018097],"r2":[0.36490473336364637,0.01362168508237775],"r2_ajustado":[0.3594783003658096,0.013735172422333833]},"11":{"mae":[0.5398661677566843,0.00701554030492921],"r2":[0.36158866148209634,0.013935812064523203],"r2_ajustado":[0.3561338877801388,0.014052417357808357]},"15":{"mae":[0.5433124409386553,0.006556826349217815],"r2":[0.35844544523997446,0.01482841984118153],"r2_ajustado":[0.3529638096136961,0.014953052085723059]},"21":{"mae":[0.5482468587696034,0.007488597629696335],"r2":[0.35322689569491217,0.014953680716951754],"r2_ajustado":[0.3477006720735075,0.01507932158722084]},"31":{"mae":[0.5524768438714268,0.008653402589219525],"r2":[0.34918112964389125,0.012131990656533491],"r2_ajustado":[0.3436203302308953,0.012233512583267908]},"51":{"mae":[0.5577678294614211,0.01019864179322292],"r2":[0.3432999408602398,0.008922314443372261],"r2_ajustado":[0.33768889536798075,0.008995205774216305]}},"knn_manhattan":{"1":{"mae":[0.44050518949054035,0.012882287452606254],"r2":[0.21041885057608542,0.04509372368907337],"r2_ajustado":[0.20367250870015238,0.04547623369427801]},"3":{"mae":[0.508442717909179,0.00787575874589289],"r2":[0.3327904528650853,0.028165842292314135],"r2_ajustado":[0.32708945571660175,0.028410048868687365]},"5":{"mae":[0.5218991044422039,0.006111955169157354],"r2":[0.35977183288113757,0.020577791908733316],"r2_ajustado":[0.35430151883716116,0.020752528092177952]},"7":{"mae":[0.5298883475814857,0.0075493862569334345],"r2":[0.3601244498749473,0.023005216601538432],"r2_ajustado":[0.3546571530065562,0.023200644714311477]},"9":{"mae":[0.5325137826278921,0.008068384061940574],"r2":[0.36339413059780357,0.027046978182326365],"r2_ajustado":[0.3579547945898562,0.0272764159004382]},"11":{"mae":[0.5337798577675216,0.007576853392844955],"r2":[0.3685508430907151,0.024482786668013273],"r2_ajustado":[0.36315557445683805,0.024689974695683455]},"15":{"mae":[0.5404004507443212,0.004734944276950778],"r2":[0.3631091798907501,0.018189229557577697],"r2_ajustado":[0.35766737712173213,0.01834362167380688]},"21":{"mae":[0.5460267226990434,0.006876374801290296],"r2":[0.35999722030041725,0.018628182027380893],"r2_ajustado":[0.3545288449787787,0.018785621748089162]},"31":{"mae":[0.5517770575732124,0.007731056450558109],"r2":[0.3508210756915863,0.016745571168822443],"r2_ajustado":[0.34527428627181456,0.016887183171628815]},"51":{"mae":[0.5579529439674571,0.008155381060307108],"r2":[0.3427746226886856,0.010126303691509327],"r2_ajustado":[0.3371590797962079,0.01021057265449002]}}},"tempos":{"cls":{"knn_euclidiana":{"treino":[5.200039595365525e-07,3.1937682032758967e-07],"teste":[0.4746118400245905,0.009568826520143198]},"knn_manhattan":{"treino":[5.400041118264199e-07,3.049613357479256e-07],"teste":[0.4215298800263554,0.005812514191303726]},"bayes_univariado":{"treino":[0.0013289399910718202,0.002590746935178231],"teste":[0.004273819993250072,0.00032325815547320363]}},"reg":{"linear":{"treino":[0.0005092599894851446,0.0001914640010431339],"teste":[4.13800124078989e-05,1.0115670861394711e-05]},"knn_euclidiana":{"treino":[7.00005330145359e-07,3.8079155480588656e-07],"teste":[19.577223160024733,0.11973325873116958]},"knn_manhattan":{"treino":[6.800051778554916e-07,3.6332080897452477e-07],"teste":[17.58603042003233,0.16933894736478777]}},"linear":{"mae":[0.5695462942867386,0.004257898743678227],"r2":[0.28817407726066646,0.018336710746693116],"r2_ajustado":[0.2820919570304435,0.018494439713240017]}},"amostras_autouniv":[{"atributos":[1,0,1,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1],"classe":"class2"},{"atributos":[0,1,0,0,0,0,1,0,0,0,0,0,1,1,1,0,1,0,0,1],"classe":"class1"},{"atributos":[0,1,1,0,1,0,1,1,1,1,0,0,0,0,0,1,1,1,0,0],"classe":"class2"},{"atributos":[0,0,1,0,1,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1],"classe":"class2"},{"atributos":[1,0,1,0,0,0,0,1,0,0,1,1,1,1,1,0,1,1,1,0],"classe":"class2"},{"atributos":[0,1,1,0,1,0,1,0,1,0,0,0,1,1,1,0,1,0,1,1],"classe":"class1"},{"atributos":[1,1,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,1,0,1],"classe":"class2"},{"atributos":[1,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,1,0,1],"classe":"class2"},{"atributos":[1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,1],"classe":"class2"},{"atributos":[0,0,0,0,1,0,0,0,1,0,0,1,0,1,1,0,1,0,0,0],"classe":"class2"},{"atributos":[0,1,1,1,0,1,1,0,1,1,0,1,0,1,1,1,0,0,1,0],"classe":"class1"},{"atributos":[0,0,1,1,0,1,1,0,0,1,0,0,0,0,1,1,1,0,1,1],"classe":"class2"}],"qualidade":{"notas":[3,4,5,6,7,8,9],"contagens":[30,216,2138,2836,1079,193,5]}}</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("dados").textContent);
+  const K = D.valores_k;
+  const REG = D.valores_regularizacao;
+  const C = D.classificacao;
+  const R = D.regressao;
+  const T = D.tempos;
+  const PADRAO = { kc: K.indexOf(3), kr: K.indexOf(5), rc: 0 };
+  const estado = { kc: PADRAO.kc, kr: PADRAO.kr, rc: PADRAO.rc, dc: "euclidiana", dr: "manhattan" };
+
+  const f3 = (v) => v.toFixed(3);
+  const regTexto = (s) => {
+    const v = Number(s);
+    if (v >= 0.01) return String(v);
+    return v.toExponential(0).replace("e-", "e-");
+  };
+  const md = (par) => `${f3(par[0])} ± ${f3(par[1])}`;
+
+  function delta(atual, ref, maior, rotuloRef) {
+    const d = atual - ref;
+    if (Math.abs(d) < 0.0005) return `<span class="d igual">= ${rotuloRef}</span>`;
+    const bom = maior ? d > 0 : d < 0;
+    return `<span class="d ${bom ? "bom" : "ruim"}">${d > 0 ? "+" : "−"}${f3(Math.abs(d))} vs. ${rotuloRef}</span>`;
+  }
+
+  // ---------- Classificação ----------
+  const METRICAS_CLS = ["acuracia", "precisao_macro", "recall_macro", "f1_macro"];
+
+  function linhaCls(nome, dados, ref, rotuloRef, tempos, detalhe) {
+    const celulas = METRICAS_CLS.map((m) =>
+      `<td>${md(dados[m])}${detalhe ? delta(dados[m][0], ref[m][0], true, rotuloRef) : ""}</td>`
+    ).join("");
+    return `<tr><td>${nome}</td>${celulas}<td>${md(tempos.treino)}</td><td>${md(tempos.teste)}</td></tr>`;
+  }
+
+  function renderCls() {
+    const k = K[estado.kc];
+    const reg = REG[estado.rc];
+    document.getElementById("kc-out").textContent = `k = ${k}`;
+    document.getElementById("rc-out").textContent = regTexto(reg);
+    const mudouK = estado.kc !== PADRAO.kc;
+    const mudouR = estado.rc !== PADRAO.rc;
+    document.getElementById("cls-corpo").innerHTML =
+      linhaCls(`kNN (Euclidiana)<small>k = ${k}</small>`, C.knn_euclidiana[k], C.knn_euclidiana["3"], "k=3", T.cls.knn_euclidiana, mudouK) +
+      linhaCls(`kNN (Manhattan)<small>k = ${k}</small>`, C.knn_manhattan[k], C.knn_manhattan["3"], "k=3", T.cls.knn_manhattan, mudouK) +
+      linhaCls(`Bayes Univariado<small>reg. = ${regTexto(reg)}</small>`, C.bayes[reg], C.bayes[REG[0]], "1e-9", T.cls.bayes_univariado, mudouR);
+
+    const serie = C["knn_" + estado.dc];
+    grafico(document.getElementById("graf-cls"), {
+      rotulosX: K.map(String), tituloX: "k",
+      series: [
+        { valores: K.map((x) => serie[x].acuracia[0]), cor: "var(--cyan)" },
+        { valores: K.map((x) => serie[x].f1_macro[0]), cor: "var(--mint)" },
+      ],
+      yMin: 0.4, yMax: 0.8, passoY: 0.1, marca: estado.kc,
+      base: { valor: C.baseline_acuracia, texto: "0.741" },
+    });
+
+    const nomeDist = estado.dc === "euclidiana" ? "Euclidiana" : "Manhattan";
+    document.getElementById("ver-cls").innerHTML =
+      `<h3>Se aumentar k (kNN ${nomeDist}, k = ${k})</h3>` +
+      veredito("Acurácia", K.map((x) => serie[x].acuracia[0]), estado.kc, true, K, "k") +
+      veredito("F1 macro", K.map((x) => serie[x].f1_macro[0]), estado.kc, true, K, "k") +
+      `<h3 style="margin-top:calc(var(--u)*0.4)">Se aumentar a regularização do Bayes</h3>` +
+      veredito("F1 macro", REG.map((r) => C.bayes[r].f1_macro[0]), estado.rc, true, REG.map(regTexto), "reg.");
+  }
+
+  // ---------- Regressão ----------
+  function renderReg() {
+    const k = K[estado.kr];
+    document.getElementById("kr-out").textContent = `k = ${k}`;
+    const mudou = estado.kr !== PADRAO.kr;
+    const linha = (nome, d, ref, tempos, detalhe) =>
+      `<tr><td>${nome}</td>` +
+      `<td>${md(d.mae)}${detalhe ? delta(d.mae[0], ref.mae[0], false, "k=5") : ""}</td>` +
+      `<td>${md(d.r2)}${detalhe ? delta(d.r2[0], ref.r2[0], true, "k=5") : ""}</td>` +
+      `<td>${md(d.r2_ajustado)}${detalhe ? delta(d.r2_ajustado[0], ref.r2_ajustado[0], true, "k=5") : ""}</td>` +
+      `<td>${md(tempos.treino)}</td><td>${md(tempos.teste)}</td></tr>`;
+    document.getElementById("reg-corpo").innerHTML =
+      linha("Regressão Linear<small>sem hiperparâmetro</small>", T.linear, T.linear, T.reg.linear, false) +
+      linha(`kNN (Euclidiana)<small>k = ${k}</small>`, R.knn_euclidiana[k], R.knn_euclidiana["5"], T.reg.knn_euclidiana, mudou) +
+      linha(`kNN (Manhattan)<small>k = ${k}</small>`, R.knn_manhattan[k], R.knn_manhattan["5"], T.reg.knn_manhattan, mudou);
+
+    const serie = R["knn_" + estado.dr];
+    const comum = { rotulosX: K.map(String), tituloX: "k", marca: estado.kr, compacto: true };
+    grafico(document.getElementById("graf-mae"), Object.assign({}, comum, {
+      series: [{ valores: K.map((x) => serie[x].mae[0]), cor: "var(--cyan)" }],
+      yMin: 0.4, yMax: 0.6, passoY: 0.05, base: { valor: T.linear.mae[0], texto: "linear" },
+    }));
+    grafico(document.getElementById("graf-r2"), Object.assign({}, comum, {
+      series: [{ valores: K.map((x) => serie[x].r2[0]), cor: "var(--cyan)" }],
+      yMin: 0.15, yMax: 0.4, passoY: 0.05, base: { valor: T.linear.r2[0], texto: "linear" },
+    }));
+
+    const nomeDist = estado.dr === "euclidiana" ? "Euclidiana" : "Manhattan";
+    document.getElementById("ver-reg").innerHTML =
+      `<h3>Se aumentar k (kNN ${nomeDist}, k = ${k})</h3>` +
+      veredito("MAE", K.map((x) => serie[x].mae[0]), estado.kr, false, K, "k") +
+      veredito("R²", K.map((x) => serie[x].r2[0]), estado.kr, true, K, "k") +
+      `<div class="item"><b>Regressão Linear:</b> não tem hiperparâmetro. A pseudo-inversa dá uma única solução: MAE ${f3(T.linear.mae[0])}, R² ${f3(T.linear.r2[0])}.</div>`;
+  }
+
+  // Diz se o próximo valor do hiperparâmetro melhora ou piora a métrica
+  function veredito(nome, valores, i, maiorMelhor, rotulos, simbolo) {
+    let melhor = 0;
+    valores.forEach((v, j) => {
+      if (maiorMelhor ? v > valores[melhor] : v < valores[melhor]) melhor = j;
+    });
+    const textoMelhor = `<span class="melhor">Melhor ${simbolo} para esta métrica: ${rotulos[melhor]} (${f3(valores[melhor])})</span>`;
+    if (i === valores.length - 1) {
+      return `<div class="item"><b>${nome}:</b> já está no maior valor testado.${textoMelhor}</div>`;
+    }
+    const d = valores[i + 1] - valores[i];
+    if (Math.abs(d) < 0.0005) {
+      return `<div class="item"><b>${nome}:</b> ir para ${simbolo} = ${rotulos[i + 1]} não muda <span class="tag">(${f3(valores[i])})</span>.${textoMelhor}</div>`;
+    }
+    const bom = maiorMelhor ? d > 0 : d < 0;
+    return `<div class="item ${bom ? "bom" : "ruim"}"><b>${nome}:</b> ir para ${simbolo} = ${rotulos[i + 1]} ${bom ? "melhora" : "piora"} ` +
+      `<span class="tag">${f3(valores[i])} → ${f3(valores[i + 1])}</span>.${textoMelhor}</div>`;
+  }
+
+  // ---------- Gráfico de linhas em SVG ----------
+  function grafico(svg, o) {
+    const vb = svg.viewBox.baseVal;
+    const W = vb.width, H = vb.height;
+    const m = { l: 40, r: o.compacto ? 12 : 54, t: 12, b: 30 };
+    const n = o.rotulosX.length;
+    const x = (i) => m.l + (i * (W - m.l - m.r)) / (n - 1);
+    const y = (v) => m.t + ((o.yMax - v) * (H - m.t - m.b)) / (o.yMax - o.yMin);
+    let s = "";
+    for (let v = o.yMin; v <= o.yMax + 1e-9; v += o.passoY) {
+      s += `<line class="eixo" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/>`;
+      s += `<text class="rot" x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(2)}</text>`;
+    }
+    o.rotulosX.forEach((r, i) => {
+      s += `<text class="rot" x="${x(i)}" y="${H - m.b + 16}" text-anchor="middle">${r}</text>`;
+    });
+    s += `<text class="rot" x="${W - m.r + 4}" y="${H - m.b + 16}">${o.tituloX}</text>`;
+    s += `<line class="marca" x1="${x(o.marca)}" x2="${x(o.marca)}" y1="${m.t}" y2="${H - m.b}"/>`;
+    if (o.base) {
+      const yb = y(o.base.valor);
+      s += `<line class="base" x1="${m.l}" x2="${W - m.r}" y1="${yb}" y2="${yb}"/>`;
+      if (!o.compacto) s += `<text class="rotbase" x="${W - m.r + 4}" y="${yb + 4}">${o.base.texto}</text>`;
+    }
+    o.series.forEach((se) => {
+      const pts = se.valores.map((v, i) => `${x(i)},${y(v)}`).join(" ");
+      s += `<polyline points="${pts}" fill="none" style="stroke:${se.cor}" stroke-width="2.5" stroke-linejoin="round"/>`;
+      se.valores.forEach((v, i) => {
+        const ativo = i === o.marca;
+        s += `<circle cx="${x(i)}" cy="${y(v)}" r="${ativo ? 5.5 : 3}" style="fill:${ativo ? se.cor : "var(--navy-2)"};stroke:${se.cor}" stroke-width="2"/>`;
+      });
+    });
+    svg.innerHTML = s;
+  }
+
+  // ---------- Controles ----------
+  const liga = (id, chave, render) => {
+    document.getElementById(id).addEventListener("input", (e) => {
+      estado[chave] = Number(e.target.value);
+      render();
+    });
+  };
+  liga("kc", "kc", renderCls);
+  liga("rc", "rc", renderCls);
+  liga("kr", "kr", renderReg);
+
+  document.querySelectorAll("#s10 [data-dist], #s11 [data-dist]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const sec = b.closest("section").id;
+      const chave = sec === "s10" ? "dc" : "dr";
+      estado[chave] = b.dataset.dist;
+      b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      sec === "s10" ? renderCls() : renderReg();
+    });
+  });
+  document.getElementById("cls-padrao").addEventListener("click", () => {
+    estado.kc = PADRAO.kc; estado.rc = PADRAO.rc;
+    document.getElementById("kc").value = PADRAO.kc;
+    document.getElementById("rc").value = PADRAO.rc;
+    renderCls();
+  });
+  document.getElementById("reg-padrao").addEventListener("click", () => {
+    estado.kr = PADRAO.kr;
+    document.getElementById("kr").value = PADRAO.kr;
+    renderReg();
+  });
+
+  // ---------- Slides 3 e 4: dados reais ----------
+  const bits = document.getElementById("bits");
+  bits.innerHTML = D.amostras_autouniv.map((linha) =>
+    linha.atributos.map((b) => `<span class="${b ? "um" : ""}"></span>`).join("") +
+    `<span class="${linha.classe === "class1" ? "c1" : "c2"}">${linha.classe === "class1" ? "1" : "2"}</span>`
+  ).join("");
+
+  (function () {
+    const svg = document.getElementById("qualidade");
+    const notas = D.qualidade.notas, cont = D.qualidade.contagens;
+    const W = 520, H = 330, m = { l: 48, r: 10, t: 20, b: 36 };
+    const max = 3000;
+    const bw = (W - m.l - m.r) / notas.length;
+    let s = "";
+    for (let v = 0; v <= max; v += 1000) {
+      const yy = m.t + (1 - v / max) * (H - m.t - m.b);
+      s += `<line x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}" stroke="#dfe9f7"/>`;
+      s += `<text x="${m.l - 8}" y="${yy + 4}" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12" fill="#54708f">${v}</text>`;
+    }
+    notas.forEach((nota, i) => {
+      const h = (cont[i] / max) * (H - m.t - m.b);
+      const xx = m.l + i * bw + bw * 0.15;
+      const yy = H - m.b - h;
+      s += `<rect x="${xx}" y="${yy}" width="${bw * 0.7}" height="${h}" fill="#1769e0"/>`;
+      s += `<text x="${xx + bw * 0.35}" y="${yy - 6}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#102542">${cont[i]}</text>`;
+      s += `<text x="${xx + bw * 0.35}" y="${H - m.b + 20}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#102542">${nota}</text>`;
+    });
+    svg.innerHTML = s;
+  })();
+
+  // ---------- Capa: rede de nós ----------
+  function desenharRede() {
+    const cv = document.getElementById("rede");
+    const r = cv.getBoundingClientRect();
+    if (!r.width) return;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = r.width * dpr; cv.height = r.height * dpr;
+    const g = cv.getContext("2d");
+    g.scale(dpr, dpr);
+    const W = r.width, H = r.height;
+    const fundo = g.createLinearGradient(0, 0, 0, H);
+    fundo.addColorStop(0, "#020b1c"); fundo.addColorStop(1, "#08244f");
+    g.fillStyle = fundo; g.fillRect(0, 0, W, H);
+    let semente = 7;
+    const rnd = () => { semente = (semente * 16807) % 2147483647; return semente / 2147483647; };
+    g.strokeStyle = "rgba(70,200,255,0.25)"; g.lineWidth = 1;
+    const hz = H * 0.62;
+    for (let i = -10; i <= 10; i++) { g.beginPath(); g.moveTo(W / 2 + i * W * 0.04, hz); g.lineTo(W / 2 + i * W * 0.3, H); g.stroke(); }
+    for (let j = 1; j < 9; j++) { const yy = hz + (H - hz) * Math.pow(j / 8, 1.7); g.beginPath(); g.moveTo(0, yy); g.lineTo(W, yy); g.stroke(); }
+    const nos = [];
+    for (let i = 0; i < 70; i++) nos.push({ x: W * (0.15 + rnd() * 0.85), y: H * (0.06 + rnd() * 0.62) * (0.4 + rnd() * 0.6) + H * 0.05, r: 1 + rnd() * 3 });
+    g.strokeStyle = "rgba(70,200,255,0.35)";
+    nos.forEach((a, i) => nos.slice(i + 1).forEach((b) => {
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < W * 0.16) { g.globalAlpha = 1 - d / (W * 0.16); g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
+    }));
+    g.globalAlpha = 1;
+    nos.forEach((p) => {
+      const gl = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+      gl.addColorStop(0, "rgba(220,245,255,0.95)"); gl.addColorStop(0.3, "rgba(70,200,255,0.5)"); gl.addColorStop(1, "rgba(70,200,255,0)");
+      g.fillStyle = gl; g.beginPath(); g.arc(p.x, p.y, p.r * 5, 0, Math.PI * 2); g.fill();
+    });
+  }
+
+  // ---------- Navegação ----------
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  let atual = 0;
+  function mostrar(i) {
+    atual = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, j) => s.classList.toggle("ativo", j === atual));
+    document.getElementById("cont").textContent = `${atual + 1} / ${slides.length}`;
+    document.getElementById("tit").textContent = slides[atual].dataset.titulo;
+    document.getElementById("ant").disabled = atual === 0;
+    document.getElementById("prox").disabled = atual === slides.length - 1;
+    if (atual === 0) requestAnimationFrame(desenharRede);
+  }
+  document.getElementById("ant").addEventListener("click", () => mostrar(atual - 1));
+  document.getElementById("prox").addEventListener("click", () => mostrar(atual + 1));
+  document.addEventListener("keydown", (e) => {
+    if (e.target.matches("input")) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); mostrar(atual + 1); }
+    if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); mostrar(atual - 1); }
+    if (e.key === "Home") mostrar(0);
+    if (e.key === "End") mostrar(slides.length - 1);
+  });
+  window.addEventListener("resize", desenharRede);
+
+  const inicio = /^#s(\d+)$/.exec(location.hash);
+  renderCls();
+  renderReg();
+  mostrar(inicio ? Number(inicio[1]) - 1 : 0);
+  desenharRede();
+})();
+</script>
