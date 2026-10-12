@@ -3,7 +3,7 @@ import numpy as np
 
 from src.utils.dados import carregar_arff
 from src.utils.normalizacao import Padronizador
-from src.regressao.regressao_linear import RegressaoLinearMultipla
+from src.regressao.regressao_linear import MRegression
 
 
 def main():
@@ -41,17 +41,17 @@ def main():
         X_teste
     )
 
-    modelo = RegressaoLinearMultipla()
+    modelo = MRegression()
 
     inicio = time.perf_counter()
 
-    modelo.treinar(X_treino, y_treino)
+    modelo.fit(X_treino, y_treino)
 
     tempo_treinamento = time.perf_counter() - inicio
 
     inicio = time.perf_counter()
 
-    previsoes = modelo.prever(X_teste)
+    previsoes = modelo.predict(X_teste)
 
     tempo_teste = time.perf_counter() - inicio
 
@@ -94,13 +94,13 @@ def main():
     )
 
     print("\nIntercepto:")
-    print(f"{modelo.intercepto:.6f}")
+    print(f"{modelo.beta[0]:.6f}")
 
     print("\nCoeficientes padronizados:")
 
     for atributo, coeficiente in zip(
         atributos,
-        modelo.coeficientes
+        modelo.beta[1:]
     ):
         print(f"{atributo}: {coeficiente:.6f}")
 

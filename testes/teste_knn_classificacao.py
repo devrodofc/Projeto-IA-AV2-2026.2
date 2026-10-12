@@ -2,7 +2,7 @@ import numpy as np
 
 from src.utils.dados import carregar_arff
 from src.utils.metricas import avaliar_classificacao
-from src.classificacao.knn import KNNClassificador
+from src.knn import KNN
 
 
 def main():
@@ -71,14 +71,15 @@ def main():
 
         print(f"\n========== kNN {distancia.upper()} ==========")
 
-        modelo = KNNClassificador(
+        modelo = KNN(
             k=3,
-            distancia=distancia
+            task="classification",
+            distance="euclidean" if distancia == "euclidiana" else "manhattan"
         )
 
-        modelo.treinar(X_treino, y_treino)
+        modelo.fit(X_treino, y_treino)
 
-        previsoes = modelo.prever(X_teste)
+        previsoes = modelo.predict(X_teste)
 
         resultado = avaliar_classificacao(
             y_teste,

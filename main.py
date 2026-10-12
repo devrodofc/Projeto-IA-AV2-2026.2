@@ -5,18 +5,18 @@ from src.utils.dados import carregar_arff
 
 def analisar_classificacao():
     """
-    Apresenta informações do dataset Spambase,
+    Apresenta informações do dataset AutoUniv-au1-1000,
     utilizado nos experimentos de classificação.
     """
 
     print("\n========== CLASSIFICAÇÃO ==========")
 
-    caminho = "datasets/classificacao/spambase.arff"
+    caminho = "datasets/classificacao/autoUniv-au1-1000.arff"
 
     X, y, atributos = carregar_arff(caminho)
 
-    print("Dataset: Spambase")
-    print("Fonte: OpenML - ID 44")
+    print("Dataset: AutoUniv-au1-1000")
+    print("Fonte: OpenML - ID 1547")
     print(f"Instâncias: {X.shape[0]}")
     print(f"Atributos preditores: {X.shape[1]}")
 

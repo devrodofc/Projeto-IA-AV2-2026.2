@@ -3,13 +3,13 @@ import time
 import numpy as np
 
 from src.utils.dados import carregar_arff
-from src.utils.validacao import criar_folds
+from src.utils.validacao import k_fold
 from src.utils.normalizacao import Padronizador
 from src.utils.metricas import avaliar_regressao
 from src.utils.exportacao import salvar_csv, resumir_resultados
 
-from src.regressao.knn import KNNRegressor
-from src.regressao.regressao_linear import RegressaoLinearMultipla
+from src.knn import KNN
+from src.regressao.regressao_linear import MRegression
 
 
 def criar_modelo(tipo):
@@ -18,19 +18,21 @@ def criar_modelo(tipo):
     """
 
     if tipo == "knn_euclidiana":
-        return KNNRegressor(
+        return KNN(
             k=5,
-            distancia="euclidiana"
+            task="regression",
+            distance="euclidean"
         )
 
     if tipo == "knn_manhattan":
-        return KNNRegressor(
+        return KNN(
             k=5,
-            distancia="manhattan"
+            task="regression",
+            distance="manhattan"
         )
 
     if tipo == "linear":
-        return RegressaoLinearMultipla()
+        return MRegression()
 
     raise ValueError(
         "Modelo inválido. Utilize: "
@@ -66,16 +68,11 @@ def main():
     print(f"Instâncias: {len(X)}")
     print(f"Atributos preditores: {quantidade_atributos}")
 
-    folds = criar_folds(
-        y,
-        quantidade_folds=5,
-        estratificado=False,
-        semente=42
-    )
+    folds = k_fold(X, y, k=5, random_state=42)
 
     resultados = []
 
-    for numero, (indices_treino, indices_teste) in enumerate(
+    for numero, (X_treino, X_teste, y_treino, y_teste) in enumerate(
         folds,
         start=1
     ):
@@ -84,12 +81,6 @@ def main():
             f"\n========== FOLD {numero} ==========",
             flush=True
         )
-
-        X_treino = X[indices_treino]
-        y_treino = y[indices_treino]
-
-        X_teste = X[indices_teste]
-        y_teste = y[indices_teste]
 
         # Evita vazamento de dados:
         # o padronizador aprende apenas com o treino.
@@ -109,7 +100,7 @@ def main():
         # Mede apenas o treinamento do modelo.
         inicio = time.perf_counter()
 
-        modelo.treinar(X_treino, y_treino)
+        modelo.fit(X_treino, y_treino)
 
         tempo_treinamento = (
             time.perf_counter() - inicio
@@ -118,7 +109,7 @@ def main():
         # Mede apenas a previsão.
         inicio = time.perf_counter()
 
-        previsoes = modelo.prever(X_teste)
+        previsoes = modelo.predict(X_teste)
 
         tempo_teste = (
             time.perf_counter() - inicio
