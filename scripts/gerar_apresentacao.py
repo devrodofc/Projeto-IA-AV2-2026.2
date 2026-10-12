@@ -68,9 +68,22 @@ def main():
         "contagens": contagens.tolist()
     }
 
-    html = MODELO.read_text(encoding="utf-8").replace(
+    conteudo = MODELO.read_text(encoding="utf-8").replace(
         "__DADOS__",
         json.dumps(dados, separators=(",", ":"))
+    )
+
+    # Documento completo: sem o doctype o navegador entra em modo de
+    # compatibilidade (tabelas não herdam cor e a impressão quebra).
+    html = (
+        "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n"
+        "<meta charset=\"utf-8\">\n"
+        "<meta name=\"viewport\" content=\"width=device-width, "
+        "initial-scale=1, viewport-fit=cover\">\n"
+        "<style>body{margin:0}img{max-width:100%}"
+        "[hidden]{display:none!important}</style>\n"
+        "</head>\n<body>\n"
+        f"{conteudo}\n</body>\n</html>\n"
     )
     SAIDA.write_text(html, encoding="utf-8")
     print(f"Apresentação gerada: {SAIDA}")

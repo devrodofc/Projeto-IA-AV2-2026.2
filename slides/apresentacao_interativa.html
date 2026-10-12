@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
 <title>Algoritmos do Zero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -209,7 +217,7 @@ input[type="range"] { width: calc(var(--u) * 20); accent-color: var(--cyan); cur
 button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
 .tabela-wrap { overflow-x: auto; border: 2px solid var(--frame-dark); background: var(--navy-2); }
-table.res { border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.08); font-variant-numeric: tabular-nums; }
+table.res { color: #dbe7f6; border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.08); font-variant-numeric: tabular-nums; }
 table.res th, table.res td { text-align: left; padding: calc(var(--u) * 0.75) calc(var(--u) * 1.1); white-space: nowrap; vertical-align: top; }
 table.res thead th { color: var(--muted-dark); font-weight: 600; border-bottom: 1px solid var(--line-dark); font-size: calc(var(--u) * 0.95); letter-spacing: 0.04em; }
 table.res tbody tr + tr td { border-top: 1px solid var(--line-dark); }
@@ -280,9 +288,39 @@ svg .rotbase { fill: #e0a93b; font-family: var(--f-mono); font-size: 10.5px; }
 .nav button:disabled { opacity: 0.35; cursor: default; }
 .nav .cont { font-family: var(--f-mono); min-width: 7ch; text-align: center; }
 .nav .tit { color: var(--muted-dark); max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav #cheia { background: var(--blue); border-color: var(--blue); }
+
+/* Modo apresentação: slide ocupando a tela inteira, sem barra */
+html.apresentando, html.apresentando body { background: #000; }
+html.apresentando body { padding: 0; height: 100vh; display: grid; place-items: center; overflow: hidden; }
+html.apresentando .deck { width: min(100vw, calc(100vh * 16 / 9)); }
+html.apresentando .slide { border-radius: 0; cursor: default; }
+html.apresentando .nav { display: none; }
+.dica {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+  background: rgba(7, 26, 53, 0.92); color: #cfe0f5; border: 1px solid var(--frame-dark);
+  font: 600 13px var(--f-body); padding: 8px 14px; pointer-events: none;
+  opacity: 0; transition: opacity 0.4s;
+}
+.dica.visivel { opacity: 1; }
+
+/* Impressão / PDF: um slide por página 16:9, com os valores do trabalho */
+@page { size: 13.333in 7.5in; margin: 0; }
+@media print {
+  html, body { background: #fff !important; }
+  body { padding: 0 !important; height: auto; display: block; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .deck { width: 100% !important; display: block; }
+  .slide { display: flex !important; width: 13.333in; height: 7.5in; aspect-ratio: auto; border-radius: 0; break-after: page; animation: none !important; }
+  .slide:last-child { break-after: auto; }
+  .nav, .dica, .btn { display: none !important; }
+  .slide { overflow: hidden !important; }
+  .capa .texto { flex: 0 0 58%; height: 100%; }
+  .capa canvas { position: absolute; top: 0; right: 0; bottom: 0; width: 42% !important; height: 100% !important; }
+}
 
 /* Tela estreita: os slides viram uma página rolável */
-@media (max-width: 760px) {
+@media screen and (max-width: 760px) {
   body { padding-block: 16px; }
   .deck { width: 100%; display: grid; gap: 16px; }
   .slide { display: flex !important; aspect-ratio: auto; --u: 9px; padding: 28px 18px; }
@@ -610,7 +648,7 @@ y_pred = model.predict(X_test)</pre>
     <p>BISHOP, C. M. Pattern Recognition and Machine Learning. Springer, 2006.</p>
     <p>MAIA, C. M. Material e códigos da disciplina Inteligência Artificial Computacional (kNN, regressão linear múltipla, hold-out). UNIFOR – CCT, 2026.</p>
   </div>
-  <p class="rodape">Python + NumPy · sem scikit-learn · sem pandas</p>
+  <p class="rodape">Python + NumPy</p>
 </section>
 
 </main>
@@ -620,7 +658,9 @@ y_pred = model.predict(X_test)</pre>
   <span class="cont" id="cont">1 / 15</span>
   <button type="button" id="prox" aria-label="Próximo slide">Próximo ›</button>
   <span class="tit" id="tit"></span>
+  <button type="button" id="cheia" aria-label="Apresentar em tela cheia">Tela cheia (F)</button>
 </nav>
+<div class="dica" id="dica" role="status">← → ou clique para avançar · Esc para sair</div>
 
 <script id="dados" type="application/json">{"valores_k":[1,3,5,7,9,11,15,21,31,51],"valores_regularizacao":["1e-09","1e-06","0.001","0.01","0.1","1.0","10.0"],"classificacao":{"knn_euclidiana":{"1":{"acuracia":[0.6910000000000001,0.015572411502397394],"precisao_macro":[0.5967133543843113,0.023001318556047843],"recall_macro":[0.5950137423785725,0.021592453338788793],"f1_macro":[0.5946177499152384,0.02133027942844402]},"3":{"acuracia":[0.714,0.026786190471957735],"precisao_macro":[0.6088537079749634,0.0291006907364625],"recall_macro":[0.5882432162347477,0.017052291670652742],"f1_macro":[0.5934973912705118,0.01968008874422589]},"5":{"acuracia":[0.743,0.018574175621006727],"precisao_macro":[0.6473690034940999,0.024964129785566294],"recall_macro":[0.596058157558925,0.01104762727303194],"f1_macro":[0.6036495162175425,0.014376907890936624]},"7":{"acuracia":[0.743,0.030536862969204968],"precisao_macro":[0.6396702195321387,0.03854046210205122],"recall_macro":[0.5813357446752013,0.03423333942873443],"f1_macro":[0.5840718928082544,0.04407183830511888]},"9":{"acuracia":[0.753,0.025149552679918606],"precisao_macro":[0.6641818271831981,0.03404659936605923],"recall_macro":[0.5795059600768008,0.02876825436702629],"f1_macro":[0.5810574749791995,0.037524330915815904]},"11":{"acuracia":[0.754,0.017102631376487085],"precisao_macro":[0.6643737219976288,0.05306230060965829],"recall_macro":[0.5749590244823717,0.035331595815498024],"f1_macro":[0.5731956289419189,0.047300212014029334]},"15":{"acuracia":[0.768,0.029706901555025922],"precisao_macro":[0.7443487120454446,0.07038317612613229],"recall_macro":[0.5719567983741246,0.03187851689702962],"f1_macro":[0.5650365282520065,0.04693302261034735]},"21":{"acuracia":[0.7579999999999999,0.027973201461398752],"precisao_macro":[0.7418594587088625,0.0780004858298811],"recall_macro":[0.5466986357346417,0.015112712185875234],"f1_macro":[0.5230172060714517,0.025662087068016867]},"31":{"acuracia":[0.7489999999999999,0.027018512172212617],"precisao_macro":[0.710485460877049,0.07499026848178707],"recall_macro":[0.5256152537079966,0.012963353022259717],"f1_macro":[0.4834525055543816,0.025084384403664572]},"51":{"acuracia":[0.7450000000000001,0.025495097567963948],"precisao_macro":[0.5720242711017014,0.27576436553713507],"recall_macro":[0.5081373646883166,0.013824106364242052],"f1_macro":[0.4419776802715223,0.03143092018182476]}},"knn_manhattan":{"1":{"acuracia":[0.6910000000000001,0.015572411502397394],"precisao_macro":[0.5967133543843113,0.023001318556047843],"recall_macro":[0.5950137423785725,0.021592453338788793],"f1_macro":[0.5946177499152384,0.02133027942844402]},"3":{"acuracia":[0.714,0.026786190471957735],"precisao_macro":[0.6088537079749634,0.0291006907364625],"recall_macro":[0.5882432162347477,0.017052291670652742],"f1_macro":[0.5934973912705118,0.01968008874422589]},"5":{"acuracia":[0.743,0.021095023109729005],"precisao_macro":[0.6478392938320907,0.028764468815219785],"recall_macro":[0.5960259647701097,0.011920538655292743],"f1_macro":[0.6037069924193602,0.01571809995561738]},"7":{"acuracia":[0.744,0.031503968004046756],"precisao_macro":[0.6416130390344387,0.0410294701644797],"recall_macro":[0.582002411341868,0.035272364986800274],"f1_macro":[0.5849551264860283,0.04540209456354584]},"9":{"acuracia":[0.752,0.02361143790623521],"precisao_macro":[0.6622240349754059,0.029852143817436505],"recall_macro":[0.5775059600768009,0.024395537700774933],"f1_macro":[0.5786651855685051,0.032268144969937185]},"11":{"acuracia":[0.754,0.018506755523321764],"precisao_macro":[0.6666296955779772,0.05366854812149708],"recall_macro":[0.5749219754387,0.034351132159271575],"f1_macro":[0.5730987395435929,0.04622269875050079]},"15":{"acuracia":[0.767,0.029706901555025922],"precisao_macro":[0.7375635554366451,0.07472604758518817],"recall_macro":[0.5712945467184956,0.032444538765709144],"f1_macro":[0.564353157325755,0.047479618219572146]},"21":{"acuracia":[0.756,0.026076809620810618],"precisao_macro":[0.7368900782893693,0.07176469287481052],"recall_macro":[0.5426578194081111,0.010097384031983583],"f1_macro":[0.5161783363310388,0.017072168012292357]},"31":{"acuracia":[0.75,0.027613402542968176],"precisao_macro":[0.7356071846934792,0.10761579299380729],"recall_macro":[0.5262819203746634,0.013115757649982303],"f1_macro":[0.4839903129422976,0.025186405272480356]},"51":{"acuracia":[0.7450000000000001,0.025495097567963948],"precisao_macro":[0.5720242711017014,0.27576436553713507],"recall_macro":[0.5081373646883166,0.013824106364242052],"f1_macro":[0.4419776802715223,0.03143092018182476]}},"bayes":{"1e-09":{"acuracia":[0.7220000000000001,0.041922547632509154],"precisao_macro":[0.6079519874431261,0.06836183502284532],"recall_macro":[0.5649816607833053,0.03620108814103881],"f1_macro":[0.5664740630705878,0.043582556235418894]},"1e-06":{"acuracia":[0.7220000000000001,0.041922547632509154],"precisao_macro":[0.6079519874431261,0.06836183502284532],"recall_macro":[0.5649816607833053,0.03620108814103881],"f1_macro":[0.5664740630705878,0.043582556235418894]},"0.001":{"acuracia":[0.7220000000000001,0.041922547632509154],"precisao_macro":[0.6079519874431261,0.06836183502284532],"recall_macro":[0.5649816607833053,0.03620108814103881],"f1_macro":[0.5664740630705878,0.043582556235418894]},"0.01":{"acuracia":[0.7220000000000001,0.04221966366516909],"precisao_macro":[0.607595916924919,0.0679162738225526],"recall_macro":[0.5636352555545472,0.03494431958273067],"f1_macro":[0.5648837859286959,0.04206381347532054]},"0.1":{"acuracia":[0.724,0.0435028734683124],"precisao_macro":[0.6045233948755573,0.07227311233338009],"recall_macro":[0.5540877703623602,0.035527586784647784],"f1_macro":[0.5511446375849239,0.04521275691267518]},"1.0":{"acuracia":[0.735,0.024238399287081665],"precisao_macro":[0.44522854970948594,0.12037148910569616],"recall_macro":[0.49878087116707526,0.006362325900898183],"f1_macro":[0.4312235989218104,0.01744690500446276]},"10.0":{"acuracia":[0.741,0.022192341021172166],"precisao_macro":[0.3705,0.011096170510586083],"recall_macro":[0.5,0.0],"f1_macro":[0.42554257859291267,0.007343349219600362]}},"baseline_acuracia":0.741},"regressao":{"knn_euclidiana":{"1":{"mae":[0.4538915841290552,0.014950324765053249],"r2":[0.18463504134419143,0.0503084346244551],"r2_ajustado":[0.177668500177549,0.05073374215801327]},"3":{"mae":[0.5162381827886838,0.007366592831299827],"r2":[0.32026285209900573,0.023022105733888205],"r2_ajustado":[0.31445493070504116,0.02321880623931274]},"5":{"mae":[0.524698890931736,0.006080300280276103],"r2":[0.35820895593121405,0.01557966184121024],"r2_ajustado":[0.352725329804922,0.015709317349952876]},"7":{"mae":[0.5301953790234438,0.006877606555517388],"r2":[0.366404606637088,0.014042263617324116],"r2_ajustado":[0.3609909900132483,0.014159385163085972]},"9":{"mae":[0.5351296417109832,0.007840389595018097],"r2":[0.36490473336364637,0.01362168508237775],"r2_ajustado":[0.3594783003658096,0.013735172422333833]},"11":{"mae":[0.5398661677566843,0.00701554030492921],"r2":[0.36158866148209634,0.013935812064523203],"r2_ajustado":[0.3561338877801388,0.014052417357808357]},"15":{"mae":[0.5433124409386553,0.006556826349217815],"r2":[0.35844544523997446,0.01482841984118153],"r2_ajustado":[0.3529638096136961,0.014953052085723059]},"21":{"mae":[0.5482468587696034,0.007488597629696335],"r2":[0.35322689569491217,0.014953680716951754],"r2_ajustado":[0.3477006720735075,0.01507932158722084]},"31":{"mae":[0.5524768438714268,0.008653402589219525],"r2":[0.34918112964389125,0.012131990656533491],"r2_ajustado":[0.3436203302308953,0.012233512583267908]},"51":{"mae":[0.5577678294614211,0.01019864179322292],"r2":[0.3432999408602398,0.008922314443372261],"r2_ajustado":[0.33768889536798075,0.008995205774216305]}},"knn_manhattan":{"1":{"mae":[0.44050518949054035,0.012882287452606254],"r2":[0.21041885057608542,0.04509372368907337],"r2_ajustado":[0.20367250870015238,0.04547623369427801]},"3":{"mae":[0.508442717909179,0.00787575874589289],"r2":[0.3327904528650853,0.028165842292314135],"r2_ajustado":[0.32708945571660175,0.028410048868687365]},"5":{"mae":[0.5218991044422039,0.006111955169157354],"r2":[0.35977183288113757,0.020577791908733316],"r2_ajustado":[0.35430151883716116,0.020752528092177952]},"7":{"mae":[0.5298883475814857,0.0075493862569334345],"r2":[0.3601244498749473,0.023005216601538432],"r2_ajustado":[0.3546571530065562,0.023200644714311477]},"9":{"mae":[0.5325137826278921,0.008068384061940574],"r2":[0.36339413059780357,0.027046978182326365],"r2_ajustado":[0.3579547945898562,0.0272764159004382]},"11":{"mae":[0.5337798577675216,0.007576853392844955],"r2":[0.3685508430907151,0.024482786668013273],"r2_ajustado":[0.36315557445683805,0.024689974695683455]},"15":{"mae":[0.5404004507443212,0.004734944276950778],"r2":[0.3631091798907501,0.018189229557577697],"r2_ajustado":[0.35766737712173213,0.01834362167380688]},"21":{"mae":[0.5460267226990434,0.006876374801290296],"r2":[0.35999722030041725,0.018628182027380893],"r2_ajustado":[0.3545288449787787,0.018785621748089162]},"31":{"mae":[0.5517770575732124,0.007731056450558109],"r2":[0.3508210756915863,0.016745571168822443],"r2_ajustado":[0.34527428627181456,0.016887183171628815]},"51":{"mae":[0.5579529439674571,0.008155381060307108],"r2":[0.3427746226886856,0.010126303691509327],"r2_ajustado":[0.3371590797962079,0.01021057265449002]}}},"tempos":{"cls":{"knn_euclidiana":{"treino":[5.200039595365525e-07,3.1937682032758967e-07],"teste":[0.4746118400245905,0.009568826520143198]},"knn_manhattan":{"treino":[5.400041118264199e-07,3.049613357479256e-07],"teste":[0.4215298800263554,0.005812514191303726]},"bayes_univariado":{"treino":[0.0013289399910718202,0.002590746935178231],"teste":[0.004273819993250072,0.00032325815547320363]}},"reg":{"linear":{"treino":[0.0005092599894851446,0.0001914640010431339],"teste":[4.13800124078989e-05,1.0115670861394711e-05]},"knn_euclidiana":{"treino":[7.00005330145359e-07,3.8079155480588656e-07],"teste":[19.577223160024733,0.11973325873116958]},"knn_manhattan":{"treino":[6.800051778554916e-07,3.6332080897452477e-07],"teste":[17.58603042003233,0.16933894736478777]}},"linear":{"mae":[0.5695462942867386,0.004257898743678227],"r2":[0.28817407726066646,0.018336710746693116],"r2_ajustado":[0.2820919570304435,0.018494439713240017]}},"amostras_autouniv":[{"atributos":[1,0,1,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1],"classe":"class2"},{"atributos":[0,1,0,0,0,0,1,0,0,0,0,0,1,1,1,0,1,0,0,1],"classe":"class1"},{"atributos":[0,1,1,0,1,0,1,1,1,1,0,0,0,0,0,1,1,1,0,0],"classe":"class2"},{"atributos":[0,0,1,0,1,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1],"classe":"class2"},{"atributos":[1,0,1,0,0,0,0,1,0,0,1,1,1,1,1,0,1,1,1,0],"classe":"class2"},{"atributos":[0,1,1,0,1,0,1,0,1,0,0,0,1,1,1,0,1,0,1,1],"classe":"class1"},{"atributos":[1,1,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,1,0,1],"classe":"class2"},{"atributos":[1,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,1,0,1],"classe":"class2"},{"atributos":[1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,1],"classe":"class2"},{"atributos":[0,0,0,0,1,0,0,0,1,0,0,1,0,1,1,0,1,0,0,0],"classe":"class2"},{"atributos":[0,1,1,1,0,1,1,0,1,1,0,1,0,1,1,1,0,0,1,0],"classe":"class1"},{"atributos":[0,0,1,1,0,1,1,0,0,1,0,0,0,0,1,1,1,0,1,1],"classe":"class2"}],"qualidade":{"notas":[3,4,5,6,7,8,9],"contagens":[30,216,2138,2836,1079,193,5]}}</script>
 <script>
@@ -895,8 +935,45 @@ y_pred = model.predict(X_test)</pre>
     if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); mostrar(atual - 1); }
     if (e.key === "Home") mostrar(0);
     if (e.key === "End") mostrar(slides.length - 1);
+    if (e.key === "f" || e.key === "F") alternarApresentacao();
+    if (e.key === "Escape" && !document.fullscreenElement) sairApresentacao();
   });
   window.addEventListener("resize", desenharRede);
+
+  // ---------- Modo apresentação (tela cheia) ----------
+  const raiz = document.documentElement;
+  let timerDica;
+  function mostrarDica() {
+    const dica = document.getElementById("dica");
+    dica.classList.add("visivel");
+    clearTimeout(timerDica);
+    timerDica = setTimeout(() => dica.classList.remove("visivel"), 2500);
+  }
+  function entrarApresentacao() {
+    raiz.classList.add("apresentando");
+    mostrarDica();
+    // Se o navegador recusar a tela cheia, o slide ainda ocupa a janela inteira
+    if (raiz.requestFullscreen) raiz.requestFullscreen().catch(() => {});
+    requestAnimationFrame(desenharRede);
+  }
+  function sairApresentacao() {
+    raiz.classList.remove("apresentando");
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    requestAnimationFrame(desenharRede);
+  }
+  function alternarApresentacao() {
+    raiz.classList.contains("apresentando") ? sairApresentacao() : entrarApresentacao();
+  }
+  document.getElementById("cheia").addEventListener("click", entrarApresentacao);
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) sairApresentacao();
+  });
+  // Clicar no slide avança, exceto em controles, tabelas e gráficos
+  document.getElementById("deck").addEventListener("click", (e) => {
+    if (!raiz.classList.contains("apresentando")) return;
+    if (e.target.closest("button, input, label, .controles, .tabela-wrap, .grafico, .pilulas")) return;
+    mostrar(atual + 1);
+  });
 
   const inicio = /^#s(\d+)$/.exec(location.hash);
   renderCls();
@@ -905,3 +982,6 @@ y_pred = model.predict(X_test)</pre>
   desenharRede();
 })();
 </script>
+
+</body>
+</html>
