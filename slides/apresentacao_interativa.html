@@ -154,6 +154,20 @@ body {
   padding: calc(var(--u) * 2.4) calc(var(--u) * 2);
 }
 .formula.escura { background: var(--navy-2); }
+/* Slides de algoritmos: o código de fit/predict é o destaque, a fórmula vira um rodapé compacto */
+.metodo { display: grid; grid-template-columns: 1fr 1.45fr; gap: calc(var(--u) * 3); flex: 1 1 auto; min-height: 0; }
+.metodo > * { min-width: 0; }
+.metodo .lado { display: flex; flex-direction: column; gap: calc(var(--u) * 1.3); }
+.metodo .lado p { font-size: calc(var(--u) * 1.4); }
+.metodo .lado b { color: var(--blue); }
+.arquivo { display: flex; flex-direction: column; min-height: 0; }
+.arquivo .aba { align-self: flex-start; background: var(--navy-2); color: var(--muted-dark); font-family: var(--f-mono); font-size: calc(var(--u) * 1); padding: calc(var(--u) * 0.5) calc(var(--u) * 1.4); border-bottom: 2px solid var(--cyan); }
+.arquivo .codigo { flex: 1 1 auto; font-size: calc(var(--u) * 1.3); line-height: 1.48; padding: calc(var(--u) * 1.6) calc(var(--u) * 2); color: #dbe7f6; }
+.codigo .kw { color: #c792ea; }
+.codigo .fn { color: var(--cyan); font-weight: 600; }
+.codigo .cm { color: #6f8fb3; font-style: italic; }
+.mini-formula { margin-top: auto; background: var(--navy-2); color: var(--mint); font-family: var(--f-mono); font-size: calc(var(--u) * 1.25); line-height: 1.6; padding: calc(var(--u) * 1) calc(var(--u) * 1.4); border-left: calc(var(--u) * 0.4) solid var(--blue); }
+.mini-formula span { display: block; color: var(--muted-dark); font-family: var(--f-body); font-size: calc(var(--u) * 0.95); letter-spacing: 0.06em; text-transform: uppercase; }
 .grande { font-family: var(--f-display); font-weight: 800; font-size: calc(var(--u) * 4.4); line-height: 1; margin: 0; }
 .azul { color: var(--blue); }
 .cinza { color: var(--muted); }
@@ -217,13 +231,14 @@ input[type="range"] { width: calc(var(--u) * 20); accent-color: var(--cyan); cur
 button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
 .tabela-wrap { flex-shrink: 0; overflow-x: auto; border: 2px solid var(--frame-dark); background: var(--navy-2); }
-table.res { color: #dbe7f6; border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.08); font-variant-numeric: tabular-nums; }
-table.res th, table.res td { text-align: left; padding: calc(var(--u) * 0.75) calc(var(--u) * 1.1); white-space: nowrap; vertical-align: top; }
+table.res { color: #dbe7f6; border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.3); font-variant-numeric: tabular-nums; }
+#s11 table.res { font-size: calc(var(--u) * 1.45); }
+table.res th, table.res td { text-align: left; padding: calc(var(--u) * 0.55) calc(var(--u) * 0.9); white-space: nowrap; vertical-align: top; }
 table.res thead th { color: var(--muted-dark); font-weight: 600; border-bottom: 1px solid var(--line-dark); font-size: calc(var(--u) * 0.95); letter-spacing: 0.04em; }
 table.res tbody tr + tr td { border-top: 1px solid var(--line-dark); }
 table.res td:first-child { color: #fff; font-weight: 600; }
-table.res td small { display: block; font-size: calc(var(--u) * 0.85); color: var(--muted-dark); }
-.d { display: block; font-size: calc(var(--u) * 0.85); }
+table.res td small { display: block; font-size: calc(var(--u) * 0.9); font-weight: 400; color: var(--muted-dark); }
+.d { display: block; font-size: calc(var(--u) * 0.95); }
 .d.bom { color: var(--good-dark); }
 .d.ruim { color: var(--bad-dark); }
 .d.igual { color: var(--muted-dark); }
@@ -268,11 +283,6 @@ svg .base { stroke: #e0a93b; stroke-width: 1.5; stroke-dasharray: 6 4; }
 svg .rotbase { fill: #e0a93b; font-family: var(--f-mono); font-size: 10.5px; }
 
 /* Resumo de hiperparâmetros */
-.licoes { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 2); }
-.licoes > * { min-width: 0; }
-.licoes h3 { font-family: var(--f-display); font-size: calc(var(--u) * 1.5); margin: 0 0 calc(var(--u) * 0.8); color: #fff; }
-.licoes p { font-size: calc(var(--u) * 1.25) !important; color: #dbe7f6; }
-.licoes .num { font-family: var(--f-mono); color: var(--cyan); }
 .fecho { font-family: var(--f-display); font-weight: 700; font-size: calc(var(--u) * 1.9) !important; text-align: center; text-wrap: balance; }
 
 .refs p { font-size: calc(var(--u) * 1.35) !important; color: #e6eef9; }
@@ -330,7 +340,7 @@ html.apresentando .nav { display: none; }
   .capa { flex-direction: column; }
   .capa .texto { padding: 0; }
   .capa canvas { height: 180px; flex: none; }
-  .duas, .analise, .licoes, .duplo { grid-template-columns: 1fr; }
+  .duas, .analise, .duplo, .metodo { grid-template-columns: 1fr; }
   .lead { max-width: none; }
   .folds { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
   .bits { grid-template-columns: repeat(21, minmax(0, 1fr)); }
@@ -416,52 +426,103 @@ html.apresentando .nav { display: none; }
 <!-- 5 -->
 <section class="slide" data-titulo="Algoritmos — kNN">
   <h2>2. Algoritmos — kNN</h2>
-  <div class="duas" style="flex:1">
-    <div style="display:grid;gap:calc(var(--u)*2)">
-      <p class="grande" style="font-size:calc(var(--u)*4)">k vizinhos.<br>Uma decisão.</p>
-      <div>
-        <p>Euclidiana: d(X,Y) = √Σ (xᵢ − yᵢ)²</p>
-        <p>Manhattan: d(X,Y) = Σ |xᵢ − yᵢ|</p>
-        <p>Classificação: voto majoritário dos k = 3 vizinhos.</p>
-        <p>Regressão: média dos k = 5 vizinhos.</p>
-        <p>Modelo “preguiçoso”: o treino só armazena os dados; o custo está na previsão.</p>
-      </div>
+  <div class="metodo">
+    <div class="lado">
+      <p class="grande" style="font-size:calc(var(--u)*3.4)">k vizinhos.<br>Uma decisão.</p>
+      <p><b>fit:</b> só guarda X e y na memória. Modelo “preguiçoso”, treino ≈ 0 s.</p>
+      <p><b>predict:</b> para cada amostra, mede a distância até todo o treino, ordena e pega os k mais próximos.</p>
+      <p>Classificação: voto majoritário (k = 3).<br>Regressão: média dos vizinhos (k = 5).</p>
+      <div class="mini-formula"><span>Distâncias</span>Euclidiana √Σ(xᵢ − yᵢ)²<br>Manhattan Σ|xᵢ − yᵢ|</div>
     </div>
-    <pre class="codigo"># classe KNN da aula
-# + parâmetro distance
-model = KNN(k=3,
-    task='classification',
-    distance='manhattan')
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)</pre>
+    <div class="arquivo">
+      <span class="aba">src/knn.py</span>
+<pre class="codigo"><span class="kw">class</span> KNN:
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X_train, y_train):  <span class="cm"># treinamento</span>
+        self.X_train = X_train
+        self.y_train = y_train
+
+    <span class="kw">def</span> <span class="fn">calculate_predicts</span>(self, x):
+        distances = [self.calculate_distances(x, x_train)
+                     <span class="kw">for</span> x_train <span class="kw">in</span> self.X_train]
+        k_indices = np.argsort(distances)[:self.k]
+        k_nearest_label = [self.y_train[i] <span class="kw">for</span> i <span class="kw">in</span> k_indices]
+        <span class="kw">if</span> self.task == <span class="fn">"classification"</span>:  <span class="cm"># voto</span>
+            unique, counts = np.unique(k_nearest_label,
+                                       return_counts=True)
+            <span class="kw">return</span> unique[np.argmax(counts)]
+        <span class="kw">if</span> self.task == <span class="fn">"regression"</span>:      <span class="cm"># média</span>
+            <span class="kw">return</span> np.mean(k_nearest_label)
+
+    <span class="kw">def</span> <span class="fn">predict</span>(self, X_test):  <span class="cm"># predição</span>
+        <span class="kw">return</span> [self.calculate_predicts(x) <span class="kw">for</span> x <span class="kw">in</span> X_test]</pre>
+    </div>
   </div>
 </section>
 
 <!-- 6 -->
 <section class="slide" data-titulo="Algoritmos — Bayes Univariado">
   <h2>2. Algoritmos — Classificador Bayesiano Univariado</h2>
-  <p class="grande" style="font-size:calc(var(--u)*2.7)">Uma normal por atributo, por classe.</p>
-  <div>
-    <p>Densidade normal univariada: p(x) = 1/(√(2π)·σ) · exp[−½((x − μ)/σ)²]</p>
-    <p>Treino: estima a priori P(Cₖ), a média μ e a variância σ² de cada atributo por classe (assume independência condicional). Implementado com a classe NaiveBayes da aula (fit/predict).</p>
-    <p>Previsão: classe com maior log P(Cₖ) + Σ log p(xⱼ | Cₖ). O logaritmo evita underflow numérico.</p>
+  <div class="metodo">
+    <div class="lado">
+      <p class="grande" style="font-size:calc(var(--u)*2.7)">Uma normal por atributo, por classe.</p>
+      <p><b>fit:</b> para cada classe, calcula a média μ, a variância σ² de cada atributo e a priori P(Cₖ). Assume atributos independentes.</p>
+      <p><b>predict:</b> soma log da priori com o log das densidades e escolhe a classe com maior valor.</p>
+      <p>Somar logaritmos em vez de multiplicar probabilidades evita underflow numérico.</p>
+      <div class="mini-formula"><span>Decisão</span>argmaxₖ log P(Cₖ) + Σⱼ log 𝒩(xⱼ; μₖⱼ, σ²ₖⱼ)</div>
+    </div>
+    <div class="arquivo">
+      <span class="aba">src/classificacao/bayes.py</span>
+<pre class="codigo"><span class="kw">class</span> NaiveBayes:  <span class="cm"># Univariado</span>
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X_train, y_train):
+        n_samples, n_features = X_train.shape
+        self._classes = np.unique(y_train)
+        <span class="cm"># ... aloca _mean, _var e _prior com zeros</span>
+        <span class="kw">for</span> idx, c <span class="kw">in</span> enumerate(self._classes):
+            X_c = X_train[y_train == c]
+            self._mean[idx, :] = X_c.mean(axis=0)
+            self._var[idx, :] = X_c.var(axis=0)
+            self._prior[idx] = X_c.shape[0] / float(n_samples)
+
+    <span class="kw">def</span> <span class="fn">predict</span>(self, X_test):
+        <span class="kw">return</span> np.array([self._predict(x) <span class="kw">for</span> x <span class="kw">in</span> X_test])
+
+    <span class="kw">def</span> <span class="fn">_predict</span>(self, x):
+        posteriors = []
+        <span class="kw">for</span> idx, c <span class="kw">in</span> enumerate(self._classes):
+            prior = np.log(self._prior[idx])  <span class="cm"># evita underflow</span>
+            posterior = np.sum(np.log(self._pdf(idx, x)))
+            posteriors.append(prior + posterior)
+        <span class="kw">return</span> self._classes[np.argmax(posteriors)]</pre>
+    </div>
   </div>
-  <div class="formula" style="margin-top:auto">P(Cₖ | x) ∝ P(Cₖ) · ∏ⱼ 𝒩(xⱼ ; μₖⱼ, σ²ₖⱼ)</div>
 </section>
 
 <!-- 7 -->
 <section class="slide" data-titulo="Algoritmos — Regressão Linear Múltipla">
   <h2>2. Algoritmos — Regressão Linear Múltipla</h2>
-  <div class="duas" style="flex:1">
-    <div style="display:grid;gap:calc(var(--u)*1.6)">
-      <p class="grande" style="font-size:calc(var(--u)*2.2)">Solução fechada, com estabilidade numérica.</p>
-      <p>Modelo: ŷ = β₀ + β₁x₁ + … + βₚxₚ, com uma coluna de 1s em X para o intercepto.</p>
-      <p>A classe MRegression da aula resolve a equação normal com a pseudo-inversa de Moore–Penrose (np.linalg.pinv), que funciona mesmo quando XᵀX não é invertível.</p>
-      <p>Modelo paramétrico: o treino calcula β uma vez; a previsão é só um produto matricial. Não tem hiperparâmetro para ajustar.</p>
+  <div class="metodo">
+    <div class="lado">
+      <p class="grande" style="font-size:calc(var(--u)*2.7)">Solução fechada, com estabilidade numérica.</p>
+      <p><b>fit:</b> adiciona uma coluna de 1s (intercepto β₀) e resolve a equação normal uma única vez.</p>
+      <p><b>predict:</b> só um produto matricial com os β já calculados. Teste em menos de 1 ms.</p>
+      <p>A pseudo-inversa de Moore–Penrose (np.linalg.pinv) funciona mesmo quando XᵀX não é invertível. Sem hiperparâmetro.</p>
+      <div class="mini-formula"><span>Equação normal</span>β = (XᵀX)⁺ Xᵀy  →  ŷ = Xβ</div>
     </div>
-    <div style="display:grid;gap:calc(var(--u)*2.4)">
-      <div class="formula" style="font-size:calc(var(--u)*3.4)">ŷ = Xβ</div>
-      <div class="formula escura" style="font-size:calc(var(--u)*3)">β = (XᵀX)⁺ Xᵀy</div>
+    <div class="arquivo">
+      <span class="aba">src/regressao/regressao_linear.py</span>
+<pre class="codigo" style="font-size:calc(var(--u)*1.5)"><span class="kw">class</span> MRegression:
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X_train, y_train):
+        N = X_train.shape[0]
+        <span class="cm"># coluna de 1s para o intercepto</span>
+        X_train = np.column_stack((np.ones(N), X_train))
+        <span class="cm"># pseudo-inversa de Moore-Penrose</span>
+        self.beta = (np.linalg.pinv(X_train.T @ X_train)
+                     @ X_train.T @ y_train)
+
+    <span class="kw">def</span> <span class="fn">predict</span>(self, X_test):
+        N = X_test.shape[0]
+        X_test = np.column_stack((np.ones(N), X_test))
+        <span class="kw">return</span> X_test @ self.beta</pre>
     </div>
   </div>
 </section>
@@ -600,21 +661,18 @@ y_pred = model.predict(X_test)</pre>
 <section class="slide escuro" data-titulo="Ajuste de hiperparâmetros">
   <h2>Ajuste de Hiperparâmetros: aumentar sempre ajuda?</h2>
   <p class="sub">Não. Cada métrica tem seu melhor valor, e passar dele piora o modelo.</p>
-  <div class="licoes">
+  <div class="duas">
     <div class="caixa">
-      <h3>k do kNN · classificação</h3>
-      <p>A acurácia sobe até k = 15 (<span class="num">0.768</span>), mas o F1 cai de <span class="num">0.604</span> (k = 5) para <span class="num">0.442</span> (k = 51).</p>
-      <p style="margin-top:calc(var(--u)*0.8)">Com k grande o voto é dominado pela classe majoritária (74%): o modelo acerta mais por “chutar” class2 e esquece a class1. <b>Melhor k pelo F1: 5.</b></p>
+      <p class="rotulo">k do kNN · classificação</p>
+      <p>A acurácia sobe até k = 15 (0.768), mas o F1 cai de 0.604 (k = 5) para 0.442 (k = 51).</p>
+      <p>Com k grande o voto é dominado pela classe majoritária (74%): o modelo acerta mais por “chutar” class2 e esquece a class1.</p>
+      <p><b>Melhor k pelo F1: 5.</b></p>
     </div>
     <div class="caixa">
-      <h3>k do kNN · regressão</h3>
-      <p>O R² sobe de <span class="num">0.21</span> (k = 1) até <span class="num">0.369</span> (k = 11, Manhattan) e depois cai: média de vizinhos demais suaviza a previsão.</p>
-      <p style="margin-top:calc(var(--u)*0.8)">O MAE é menor em k = 1 (<span class="num">0.441</span>) porque copia notas inteiras: acerta muitas exatamente e erra feio as outras, o que o R² penaliza. <b>Melhor k pelo R²: 7 a 11.</b></p>
-    </div>
-    <div class="caixa">
-      <h3>Bayes Univariado</h3>
-      <p>A classe NaiveBayes da aula não tem hiperparâmetro: média, variância e priori saem direto dos dados de treino.</p>
-      <p style="margin-top:calc(var(--u)*0.8)">Verificamos que nenhum atributo tem variância zero em nenhuma classe (a menor é <span class="num">0.63</span> após a padronização), então a densidade normal nunca divide por zero. <b>Resultado fixo: F1 0.566.</b></p>
+      <p class="rotulo">k do kNN · regressão</p>
+      <p>O R² sobe de 0.21 (k = 1) até 0.369 (k = 11, Manhattan) e depois cai: média de vizinhos demais suaviza a previsão.</p>
+      <p>O MAE é menor em k = 1 (0.441) porque copia notas inteiras: acerta muitas exatamente e erra feio as outras, o que o R² penaliza.</p>
+      <p><b>Melhor k pelo R²: 7 a 11.</b></p>
     </div>
   </div>
   <p class="fecho" style="margin-top:auto">Aumentar k reduz a variância e aumenta o viés. O ponto ótimo depende da métrica escolhida, por isso a métrica deve ser definida antes de ajustar.</p>
