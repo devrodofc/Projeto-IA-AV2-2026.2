@@ -20,11 +20,8 @@ e previsão.
 
 - Python 3
 - NumPy 2.5.3
-- Matplotlib 3.11.2
 - Biblioteca CSV nativa do Python
 - Git e GitHub
-
-O Matplotlib é utilizado exclusivamente para gerar gráficos.
 
 ## 3. Datasets
 
@@ -373,30 +370,7 @@ O comando produz:
 - `resultados/classificacao_resumo.csv`
 - `resultados/regressao_resumo.csv`
 
-## 12. Gráficos
-
-Para gerar os gráficos:
-
-```bash
-python -m scripts.gerar_graficos
-```
-
-Os arquivos são salvos em:
-
-`resultados/graficos/`
-
-Gráficos produzidos:
-
-1. Acurácia e F1 macro dos classificadores.
-2. Tempo de previsão dos classificadores.
-3. MAE dos regressores.
-4. R² dos regressores.
-5. Tempo de previsão dos regressores.
-
-Os gráficos de tempos utilizam escala logarítmica
-para permitir a comparação de valores muito diferentes.
-
-## 13. Estrutura do projeto
+## 12. Estrutura do projeto
 
 ```text
 Projeto-IA-AV2-2026.2/
@@ -417,19 +391,17 @@ Projeto-IA-AV2-2026.2/
 │       └── validacao.py
 ├── testes/
 ├── scripts/
-│   ├── consolidar_resultados.py
-│   └── gerar_graficos.py
+│   └── consolidar_resultados.py
 ├── resultados/
 │   ├── classificacao/
-│   ├── regressao/
-│   └── graficos/
+│   └── regressao/
 ├── slides/
 ├── main.py
 ├── requirements.txt
 └── README.md
 ```
 
-## 14. Conclusão
+## 13. Conclusão
 
 Nos experimentos realizados, na classificação o Bayes
 Univariado obteve a maior acurácia e os modelos kNN o maior
