@@ -44,7 +44,12 @@ def varredura_perceptron():
     Grade de taxa de aprendizado × épocas do Perceptron.
     """
 
-    metricas = ("acuracia", "precisao_macro", "recall_macro", "f1_macro")
+    # As quatro últimas são da classe positiva (class1) e, como a
+    # matriz de confusão, são apresentadas só para o Perceptron.
+    metricas = (
+        "acuracia", "precisao_macro", "recall_macro", "f1_macro",
+        "sensibilidade", "especificidade", "precisao", "f1"
+    )
     linhas = ler_csv("resultados/classificacao/perceptron_hiperparametros.csv")
 
     return {
@@ -54,7 +59,10 @@ def varredura_perceptron():
             # Chave: índice da taxa | índice das épocas.
             f"{redes.TAXAS_PERCEPTRON.index(float(linha['learning_rate']))}|"
             f"{redes.EPOCAS_PERCEPTRON.index(int(linha['epocas']))}":
-                pares(linha, metricas)
+                dict(
+                    pares(linha, metricas),
+                    matriz=[int(linha[c]) for c in ("vp", "fn", "fp", "vn")]
+                )
             for linha in linhas
         },
         "padrao": {
@@ -70,7 +78,7 @@ def varredura_mlp():
     na configuração do trabalho).
     """
 
-    metricas = ("mae", "r2", "r2_ajustado", "r2_treino")
+    metricas = ("mse", "rmse", "mae", "r2", "r2_ajustado", "r2_treino")
     linhas = ler_csv("resultados/regressao/mlp_topologias.csv")
     base = redes.BASE_MLP
 
@@ -179,7 +187,7 @@ def main():
         },
         "linear": {
             metrica: par(reg["linear"], metrica)
-            for metrica in ("mae", "r2", "r2_ajustado")
+            for metrica in ("mse", "rmse", "mae", "r2", "r2_ajustado")
         }
     }
 

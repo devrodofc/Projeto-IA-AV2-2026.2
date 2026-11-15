@@ -220,13 +220,20 @@ input[type="range"] { width: calc(var(--u) * 20); accent-color: var(--cyan); cur
 .pilulas button[aria-pressed="true"] { background: var(--blue); color: #fff; }
 .btn { border: 1px solid var(--frame-dark); }
 .btn:hover, .pilulas button:hover { color: #fff; }
-#s12 input[type="range"], #s13 input[type="range"] { width: calc(var(--u) * 11); }
+#s12 input[type="range"], #s14 input[type="range"] { width: calc(var(--u) * 11); }
 .controle select { font: inherit; letter-spacing: 0; text-transform: none; color: #fff; background: var(--navy-2); border: 1px solid var(--frame-dark); padding: 0 calc(var(--u) * 0.3); margin-left: calc(var(--u) * 0.4); cursor: pointer; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
 .tabela-wrap { flex-shrink: 0; overflow-x: auto; border: 2px solid var(--frame-dark); background: var(--navy-2); }
 table.res { color: #dbe7f6; border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.3); font-variant-numeric: tabular-nums; }
-#s13 table.res { font-size: calc(var(--u) * 1.45); }
+#s14 table.res { font-size: calc(var(--u) * 1.2); }
+.matriz { display: grid; grid-template-columns: auto 1fr 1fr; gap: calc(var(--u) * 0.7); font-family: var(--f-mono); }
+.matriz .cab { color: var(--muted-dark); font-size: calc(var(--u) * 1.05); letter-spacing: 0.04em; text-transform: uppercase; text-align: center; align-self: center; }
+.matriz .cel { background: #0b254a; border: 2px solid var(--frame-dark); padding: calc(var(--u) * 1.5) calc(var(--u) * 1); text-align: center; }
+.matriz .cel b { display: block; font-family: var(--f-display); font-size: calc(var(--u) * 3.6); line-height: 1.1; color: #fff; }
+.matriz .cel span { font-size: calc(var(--u) * 1.05); color: var(--muted-dark); }
+.matriz .cel.certo { border-color: var(--good-dark); }
+.matriz .cel.erro { border-color: var(--bad-dark); }
 table.res th, table.res td { text-align: left; padding: calc(var(--u) * 0.55) calc(var(--u) * 0.9); white-space: nowrap; vertical-align: top; }
 table.res thead th { color: var(--muted-dark); font-weight: 600; border-bottom: 1px solid var(--line-dark); font-size: calc(var(--u) * 0.95); letter-spacing: 0.04em; }
 table.res tbody tr + tr td { border-top: 1px solid var(--line-dark); }
@@ -629,18 +636,26 @@ html.apresentando .nav { display: none; }
   <h2>3.2 Métricas de Avaliação</h2>
   <div class="duas" style="flex:1">
     <div class="caixa mono">
-      <p class="rotulo">Classificação</p>
+      <p class="rotulo">Classificação · todos os classificadores</p>
       <p>Acurácia = (VP + VN) / N</p>
       <p>Precisão = VP / (VP + FP)</p>
       <p>Recall = VP / (VP + FN)</p>
       <p>F1 = 2 · P · R / (P + R)</p>
-      <p class="cinza" style="font-family:var(--f-body);font-size:calc(var(--u)*1.2);margin-top:calc(var(--u)*1.2)">Precisão, recall e F1 são médias macro entre as classes.</p>
+      <p class="cinza" style="font-family:var(--f-body);font-size:calc(var(--u)*1.2)">Precisão, recall e F1 são médias macro entre as classes.</p>
+      <p class="rotulo" style="margin-top:calc(var(--u)*1.4)">Apenas para o Perceptron</p>
+      <p>Matriz de confusão: VP, FN, FP, VN</p>
+      <p>Sensibilidade = VP / (VP + FN)</p>
+      <p>Especificidade = VN / (VN + FP)</p>
+      <p class="cinza" style="font-family:var(--f-body);font-size:calc(var(--u)*1.2)">Calculadas com a class1 (minoritária) como positiva.</p>
     </div>
     <div class="caixa mono">
-      <p class="rotulo">Regressão</p>
+      <p class="rotulo">Regressão · todos os regressores</p>
+      <p>MSE = (1/n) Σ (yᵢ − ŷᵢ)²</p>
+      <p>RMSE = √MSE</p>
       <p>MAE = (1/n) Σ |yᵢ − ŷᵢ|</p>
       <p>R² = 1 − SSres / SStot</p>
       <p>R²aj = 1 − (1 − R²)(n − 1)/(n − p − 1)</p>
+      <p class="cinza" style="font-family:var(--f-body);font-size:calc(var(--u)*1.2)">MSE e RMSE penalizam mais os erros grandes; o RMSE está na unidade da nota.</p>
     </div>
   </div>
   <p class="cinza" style="text-align:center;font-size:calc(var(--u)*1.25)">Todas implementadas manualmente com NumPy.</p>
@@ -689,11 +704,30 @@ html.apresentando .nav { display: none; }
     </div>
     <div class="veredito" id="ver-cls"></div>
   </div>
-  <p class="nota">* No kNN, tempo medido na configuração do trabalho: ele quase não muda com k, pois o custo é calcular e ordenar as distâncias para todo o treino. No Perceptron, o tempo de treino cresce com o número de épocas.</p>
+  <p class="nota">* kNN: tempo da configuração do trabalho (quase não muda com k). Perceptron: ao mover os controles, tempo de cada configuração.</p>
+</section>
+
+<!-- 1 -->
+<section class="slide escuro" id="s13" data-titulo="Resultados de Classificação — Perceptron">
+  <h2>3.3 Resultados de Classificação — Perceptron</h2>
+  <p class="sub">Métricas exigidas apenas para o Perceptron · classe positiva: class1 (minoritária) · <span id="mc-config"></span></p>
+  <div class="duas" style="align-items:center;flex:1">
+    <div>
+      <p class="rotulo">Matriz de confusão · soma dos 5 folds</p>
+      <div class="matriz" id="mc-matriz"></div>
+    </div>
+    <div class="tabela-wrap">
+      <table class="res" style="font-size:calc(var(--u)*1.5)">
+        <thead><tr><th>MÉTRICA</th><th>MÉDIA ± DESVIO (5 FOLDS)</th></tr></thead>
+        <tbody id="mc-corpo"></tbody>
+      </table>
+    </div>
+  </div>
+  <p class="fecho" id="mc-fecho"></p>
 </section>
 
 <!-- 13 -->
-<section class="slide escuro" id="s13" data-titulo="Resultados de Regressão">
+<section class="slide escuro" id="s14" data-titulo="Resultados de Regressão">
   <h2>3.3 Resultados de Regressão</h2>
   <p class="sub">Wine Quality · média ± desvio-padrão em 5 folds · mova os controles para ver o efeito dos hiperparâmetros</p>
   <div class="controles">
@@ -714,7 +748,7 @@ html.apresentando .nav { display: none; }
   </div>
   <div class="tabela-wrap">
     <table class="res">
-      <thead><tr><th>REGRESSOR</th><th>MAE</th><th>R²</th><th>R² AJUSTADO</th><th>TREINO (s)</th><th>TESTE (s)*</th></tr></thead>
+      <thead><tr><th>REGRESSOR</th><th>MSE</th><th>RMSE</th><th>MAE</th><th>R²</th><th>R² AJUSTADO</th><th>TREINO (s)</th><th>TESTE (s)*</th></tr></thead>
       <tbody id="reg-corpo"></tbody>
     </table>
   </div>
@@ -728,7 +762,7 @@ html.apresentando .nav { display: none; }
     </div>
     <div class="veredito" id="ver-reg"></div>
   </div>
-  <p class="nota">* No kNN, tempo medido na configuração do trabalho (quase não depende de k). No MLP, o tempo é o de cada configuração.</p>
+  <p class="nota">* kNN: tempo da configuração do trabalho (quase não depende de k). MLP: ao mover os controles, tempo de cada configuração.</p>
 </section>
 
 <!-- 14 -->
@@ -952,6 +986,28 @@ html.apresentando .nav { display: none; }
     return `<tr><td>${nome}</td>${celulas}<td>${md(tempos.treino)}</td><td>${md(tempos.teste)}</td></tr>`;
   }
 
+  // Matriz de confusão e métricas da classe positiva (só Perceptron)
+  function renderMatriz(per, taxa, epocas) {
+    const [vp, fn, fp, vn] = per.matriz;
+    const celula = (classe, sigla, valor, texto) =>
+      `<div class="cel ${classe}"><b>${valor}</b><span>${sigla} · ${texto}</span></div>`;
+    document.getElementById("mc-config").textContent = `η = ${taxa} · ${epocas} épocas`;
+    document.getElementById("mc-matriz").innerHTML =
+      `<span></span><span class="cab">Previsto class1</span><span class="cab">Previsto class2</span>` +
+      `<span class="cab">Real class1</span>` + celula("certo", "VP", vp, "acerto") + celula("erro", "FN", fn, "erro") +
+      `<span class="cab">Real class2</span>` + celula("erro", "FP", fp, "erro") + celula("certo", "VN", vn, "acerto");
+    const linha = (nome, formula, par) => `<tr><td>${nome}<small>${formula}</small></td><td>${md(par)}</td></tr>`;
+    document.getElementById("mc-corpo").innerHTML =
+      linha("Acurácia", "(VP + VN) / N", per.acuracia) +
+      linha("Sensibilidade (recall)", "VP / (VP + FN)", per.sensibilidade) +
+      linha("Especificidade", "VN / (VN + FP)", per.especificidade) +
+      linha("Precisão", "VP / (VP + FP)", per.precisao) +
+      linha("F1-score", "2 · P · R / (P + R)", per.f1);
+    const pct = (v) => `${Math.round(v * 100)}%`;
+    document.getElementById("mc-fecho").textContent =
+      `Reconhece ${pct(vn / (vn + fp))} da class2 (majoritária) e ${pct(vp / (vp + fn))} da class1 (minoritária).`;
+  }
+
   function renderCls() {
     const k = K[estado.kc];
     const taxa = P.taxas[estado.pt], epocas = P.epocas[estado.pe];
@@ -965,7 +1021,9 @@ html.apresentando .nav { display: none; }
       linhaCls(`kNN (Euclidiana)<small>k = ${k}</small>`, C.knn_euclidiana[k], C.knn_euclidiana["3"], "k=3", T.cls.knn_euclidiana, mudouK) +
       linhaCls(`kNN (Manhattan)<small>k = ${k}</small>`, C.knn_manhattan[k], C.knn_manhattan["3"], "k=3", T.cls.knn_manhattan, mudouK) +
       linhaCls(`Bayes Univariado<small>sem hiperparâmetro</small>`, C.bayes, C.bayes, "", T.cls.bayes_univariado, false) +
-      linhaCls(`Perceptron Simples<small>η = ${taxa} · ${epocas} épocas</small>`, per, celulaP(PADRAO.pt, PADRAO.pe), "trabalho", per, mudouP);
+      linhaCls(`Perceptron Simples<small>η = ${taxa} · ${epocas} épocas</small>`, per, celulaP(PADRAO.pt, PADRAO.pe), "trabalho", mudouP ? per : T.cls.perceptron, mudouP);
+
+    renderMatriz(per, taxa, epocas);
 
     const svg = document.getElementById("graf-cls");
     const base = { valor: C.baseline_acuracia, texto: "0.741" };
@@ -985,10 +1043,10 @@ html.apresentando .nav { display: none; }
         if (!melhor || v > melhor.v) melhor = { t: t, e: e, v: v };
       }));
       document.getElementById("ver-cls").innerHTML =
-        `<h3>Se aumentar as épocas (Perceptron, η = ${taxa}, ${epocas} épocas)</h3>` +
+        `<h3>Perceptron: se aumentar as épocas</h3>` +
         veredito("Acurácia", acuracia, estado.pe, true, P.epocas, "nº de épocas") +
         veredito("F1 macro", f1, estado.pe, true, P.epocas, "nº de épocas") +
-        `<div class="item"><b>Melhor combinação pelo F1:</b> η = ${P.taxas[melhor.t]} com ${P.epocas[melhor.e]} épocas (${f3(melhor.v)}). Não há tendência clara: as classes não são linearmente separáveis e o Perceptron não converge.</div>`;
+        `<div class="item"><b>Melhor F1:</b> η = ${P.taxas[melhor.t]} e ${P.epocas[melhor.e]} épocas (${f3(melhor.v)}). Sem tendência: não converge.</div>`;
       return;
     }
 
@@ -1026,6 +1084,8 @@ html.apresentando .nav { display: none; }
     const mudou = estado.kr !== PADRAO.kr;
     const linha = (nome, d, ref, tempos, detalhe, rotuloRef) =>
       `<tr><td>${nome}</td>` +
+      `<td>${md(d.mse)}${detalhe ? delta(d.mse[0], ref.mse[0], false, rotuloRef) : ""}</td>` +
+      `<td>${md(d.rmse)}${detalhe ? delta(d.rmse[0], ref.rmse[0], false, rotuloRef) : ""}</td>` +
       `<td>${md(d.mae)}${detalhe ? delta(d.mae[0], ref.mae[0], false, rotuloRef) : ""}</td>` +
       `<td>${md(d.r2)}${detalhe ? delta(d.r2[0], ref.r2[0], true, rotuloRef) : ""}</td>` +
       `<td>${md(d.r2_ajustado)}${detalhe ? delta(d.r2_ajustado[0], ref.r2_ajustado[0], true, rotuloRef) : ""}</td>` +
@@ -1034,7 +1094,7 @@ html.apresentando .nav { display: none; }
       linha("Regressão Linear<small>sem hiperparâmetro</small>", T.linear, T.linear, T.reg.linear, false, "") +
       linha(`kNN (Euclidiana)<small>k = ${k}</small>`, R.knn_euclidiana[k], R.knn_euclidiana["5"], T.reg.knn_euclidiana, mudou, "k=5") +
       linha(`kNN (Manhattan)<small>k = ${k}</small>`, R.knn_manhattan[k], R.knn_manhattan["5"], T.reg.knn_manhattan, mudou, "k=5") +
-      linha(`MLP<small>${mlp.config}</small>`, mlp, fator.itens[fator.padrao], mlp, estado.mi !== fator.padrao, "trabalho");
+      linha(`MLP<small>${mlp.config}</small>`, mlp, fator.itens[fator.padrao], estado.mi !== fator.padrao ? mlp : T.reg.mlp, estado.mi !== fator.padrao, "trab.");
 
     const svgMae = document.getElementById("graf-mae");
     const svgR2 = document.getElementById("graf-r2");
@@ -1058,13 +1118,12 @@ html.apresentando .nav { display: none; }
 
       const simbolo = SIMBOLO_MLP[estado.mf];
       const divergiu = fator.divergiram.length
-        ? ` Com ${simbolo} = ${fator.divergiram.join(" e ")} o treinamento divergiu.` : "";
+        ? ` Com ${simbolo} = ${fator.divergiram.join(" e ")} divergiu.` : "";
       document.getElementById("ver-reg").innerHTML =
-        `<h3>MLP · variando ${fator.nome.toLowerCase()} (agora ${mlp.rotulo})</h3>` +
+        `<h3>MLP: variando ${fator.nome.toLowerCase()} (${mlp.rotulo})</h3>` +
         veredito("MAE", mae, estado.mi, false, rotulos, simbolo) +
         veredito("R²", r2, estado.mi, true, rotulos, simbolo) +
-        `<div class="item"><b>Generalização:</b> R² ${f3(mlp.r2_treino[0])} no treino e ${f3(mlp.r2[0])} no teste ` +
-        `(diferença ${f3(mlp.r2_treino[0] - mlp.r2[0])}). Treino em ${mlp.treino[0].toFixed(2)} s por fold.${divergiu}</div>`;
+        `<div class="item"><b>Generalização:</b> R² ${f3(mlp.r2_treino[0])} no treino e ${f3(mlp.r2[0])} no teste.${divergiu}</div>`;
       return;
     }
 
@@ -1165,19 +1224,19 @@ html.apresentando .nav { display: none; }
   liga("kc", "kc", renderCls, "s12", null);
   liga("pt", "pt", renderCls, "s12", "perceptron");
   liga("pe", "pe", renderCls, "s12", "perceptron");
-  liga("kr", "kr", renderReg, "s13", null);
-  liga("mi", "mi", renderReg, "s13", "mlp");
+  liga("kr", "kr", renderReg, "s14", null);
+  liga("mi", "mi", renderReg, "s14", "mlp");
 
   const seletor = document.getElementById("mf");
   seletor.innerHTML = Object.keys(M).map((f) => `<option value="${f}">${M[f].nome}</option>`).join("");
   seletor.addEventListener("change", () => {
     estado.mf = seletor.value;
     estado.mi = M[estado.mf].padrao;
-    focar("s13", "mlp");
+    focar("s14", "mlp");
     renderReg();
   });
 
-  document.querySelectorAll("#s12 [data-dist], #s13 [data-dist]").forEach((b) => {
+  document.querySelectorAll("#s12 [data-dist], #s14 [data-dist]").forEach((b) => {
     b.addEventListener("click", () => {
       const sec = b.closest("section").id;
       focar(sec, b.dataset.dist);
