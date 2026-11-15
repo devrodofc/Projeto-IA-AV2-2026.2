@@ -1,0 +1,2 @@
+modelo,acuracia_media,acuracia_desvio,precisao_macro_media,precisao_macro_desvio,recall_macro_media,recall_macro_desvio,f1_macro_media,f1_macro_desvio,tempo_treinamento_media,tempo_treinamento_desvio,tempo_teste_media,tempo_teste_desvio
+perceptron,0.6699999999999999,0.028284271247461898,0.5705017181652084,0.04040214609795616,0.5734149341665942,0.04478763541911968,0.570444114192101,0.04186754274304793,0.886665880001965,0.11165980951080101,9.806000161916018e-05,4.7979036698618085e-05

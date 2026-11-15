@@ -10,6 +10,15 @@ from src.utils.exportacao import salvar_csv, resumir_resultados
 
 from src.knn import KNN
 from src.regressao.regressao_linear import MRegression
+from src.regressao.mlp import MLP
+
+
+# Configuração do MLP usada nos experimentos. A varredura
+# (scripts/varrer_redes_neurais.py) varia um fator por vez em torno dela.
+MLP_CAMADAS = (64,)
+MLP_ATIVACAO = "relu"
+MLP_LEARNING_RATE = 0.01
+MLP_EPOCAS = 100
 
 
 def criar_modelo(tipo):
@@ -34,9 +43,17 @@ def criar_modelo(tipo):
     if tipo == "linear":
         return MRegression()
 
+    if tipo == "mlp":
+        return MLP(
+            hidden_layers=MLP_CAMADAS,
+            activation=MLP_ATIVACAO,
+            learning_rate=MLP_LEARNING_RATE,
+            n_epochs=MLP_EPOCAS
+        )
+
     raise ValueError(
         "Modelo inválido. Utilize: "
-        "knn_euclidiana, knn_manhattan ou linear."
+        "knn_euclidiana, knn_manhattan, linear ou mlp."
     )
 
 
@@ -45,7 +62,7 @@ def main():
     if len(sys.argv) != 2:
         raise ValueError(
             "Informe o modelo: "
-            "knn_euclidiana, knn_manhattan ou linear."
+            "knn_euclidiana, knn_manhattan, linear ou mlp."
         )
 
     tipo = sys.argv[1].lower()
@@ -124,12 +141,24 @@ def main():
         resultados.append({
             "modelo": tipo,
             "fold": numero,
+            "mse": metricas["mse"],
+            "rmse": metricas["rmse"],
             "mae": metricas["mae"],
             "r2": metricas["r2"],
             "r2_ajustado": metricas["r2_ajustado"],
             "tempo_treinamento": tempo_treinamento,
             "tempo_teste": tempo_teste
         })
+
+        print(
+            f"MSE: {metricas['mse']:.4f}",
+            flush=True
+        )
+
+        print(
+            f"RMSE: {metricas['rmse']:.4f}",
+            flush=True
+        )
 
         print(
             f"MAE: {metricas['mae']:.4f}",

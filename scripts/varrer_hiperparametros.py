@@ -132,6 +132,8 @@ def varrer_regressao():
                 previsoes = np.mean(y_treino[ordem[:, :k]], axis=1)
                 m = avaliar_regressao(y_teste, previsoes, X.shape[1])
                 por_k[k].append({
+                    "mse": m["mse"],
+                    "rmse": m["rmse"],
                     "mae": m["mae"],
                     "r2": m["r2"],
                     "r2_ajustado": m["r2_ajustado"],

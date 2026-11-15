@@ -9,13 +9,15 @@ DIRETORIO_RESULTADOS = Path("resultados")
 MODELOS_CLASSIFICACAO = [
     "knn_euclidiana",
     "knn_manhattan",
-    "bayes_univariado"
+    "bayes_univariado",
+    "perceptron"
 ]
 
 MODELOS_REGRESSAO = [
     "linear",
     "knn_euclidiana",
-    "knn_manhattan"
+    "knn_manhattan",
+    "mlp"
 ]
 
 

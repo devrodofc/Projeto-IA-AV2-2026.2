@@ -141,6 +141,32 @@ def recall(y_real, y_previsto, classe_positiva):
     return vp / (vp + fn)
 
 
+def especificidade(y_real, y_previsto, classe_positiva):
+    """
+    Calcula a especificidade de uma classe:
+    proporção dos negativos reais previstos como negativos.
+    """
+
+    y_real, y_previsto = validar_classificacao(
+        y_real, y_previsto
+    )
+
+    vn = np.sum(
+        (y_real != classe_positiva)
+        & (y_previsto != classe_positiva)
+    )
+
+    fp = np.sum(
+        (y_real != classe_positiva)
+        & (y_previsto == classe_positiva)
+    )
+
+    if vn + fp == 0:
+        return 0.0
+
+    return float(vn / (vn + fp))
+
+
 def f1_score(y_real, y_previsto, classe_positiva):
     """
     Calcula o F1-score de uma classe.
@@ -179,6 +205,9 @@ def avaliar_classificacao(y_real, y_previsto):
                 y_real, y_previsto, classe
             ),
             "recall": recall(
+                y_real, y_previsto, classe
+            ),
+            "especificidade": especificidade(
                 y_real, y_previsto, classe
             ),
             "f1": f1_score(
@@ -274,6 +303,31 @@ def mae(y_real, y_previsto):
     return float(np.mean(erros_absolutos))
 
 
+def mse(y_real, y_previsto):
+    """
+    Calcula o Erro Quadrático Médio (MSE).
+    """
+
+    y_real, y_previsto = validar_regressao(
+        y_real,
+        y_previsto
+    )
+
+    erros_quadrados = (
+        y_real - y_previsto
+    ) ** 2
+
+    return float(np.mean(erros_quadrados))
+
+
+def rmse(y_real, y_previsto):
+    """
+    Calcula a Raiz do Erro Quadrático Médio (RMSE).
+    """
+
+    return float(np.sqrt(mse(y_real, y_previsto)))
+
+
 def r_score(y_true, y_pred):
     numerador = np.sum((y_true-y_pred)**2)
     denominador = np.sum((y_true-np.mean(y_true))**2)
@@ -345,6 +399,8 @@ def avaliar_regressao(
     """
 
     return {
+        "mse": mse(y_real, y_previsto),
+        "rmse": rmse(y_real, y_previsto),
         "mae": mae(y_real, y_previsto),
         "r2": r2_score(y_real, y_previsto),
         "r2_ajustado": r2_ajustado(

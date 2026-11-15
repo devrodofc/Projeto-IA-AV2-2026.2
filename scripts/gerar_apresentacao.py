@@ -4,7 +4,9 @@ from pathlib import Path
 
 import numpy as np
 
+from scripts import varrer_redes_neurais as redes
 from src.utils.dados import carregar_arff
+from testes import teste_cv_perceptron_classificacao as perceptron
 
 
 MODELO = Path("slides/modelo_interativo.html")
@@ -16,11 +18,148 @@ def ler_resumo(caminho):
         return {linha["modelo"]: linha for linha in csv.DictReader(arquivo)}
 
 
+def ler_csv(caminho):
+    with open(caminho, newline="", encoding="utf-8") as arquivo:
+        return list(csv.DictReader(arquivo))
+
+
 def par(linha, metrica):
     return [
         float(linha[f"{metrica}_media"]),
         float(linha[f"{metrica}_desvio"])
     ]
+
+
+def pares(linha, metricas):
+    item = {metrica: par(linha, metrica) for metrica in metricas}
+    for chave in ("treino", "teste"):
+        coluna = f"tempo_{'treinamento' if chave == 'treino' else 'teste'}"
+        if f"{coluna}_media" in linha:
+            item[chave] = par(linha, coluna)
+    return item
+
+
+def varredura_perceptron():
+    """
+    Grade de taxa de aprendizado × épocas do Perceptron.
+    """
+
+    # As quatro últimas são da classe positiva (class1) e, como a
+    # matriz de confusão, são apresentadas só para o Perceptron.
+    metricas = (
+        "acuracia", "precisao_macro", "recall_macro", "f1_macro",
+        "sensibilidade", "especificidade", "precisao", "f1"
+    )
+    linhas = ler_csv("resultados/classificacao/perceptron_hiperparametros.csv")
+
+    return {
+        "taxas": redes.TAXAS_PERCEPTRON,
+        "epocas": redes.EPOCAS_PERCEPTRON,
+        "grade": {
+            # Chave: índice da taxa | índice das épocas.
+            f"{redes.TAXAS_PERCEPTRON.index(float(linha['learning_rate']))}|"
+            f"{redes.EPOCAS_PERCEPTRON.index(int(linha['epocas']))}":
+                dict(
+                    pares(linha, metricas),
+                    matriz=[int(linha[c]) for c in ("vp", "fn", "fp", "vn")]
+                )
+            for linha in linhas
+        },
+        "padrao": {
+            "taxa": redes.TAXAS_PERCEPTRON.index(perceptron.LEARNING_RATE),
+            "epocas": redes.EPOCAS_PERCEPTRON.index(perceptron.EPOCAS)
+        }
+    }
+
+
+def varredura_mlp():
+    """
+    Para cada fator, os valores avaliados (os outros fatores ficam
+    na configuração do trabalho).
+    """
+
+    metricas = ("mse", "rmse", "mae", "r2", "r2_ajustado", "r2_treino")
+    linhas = ler_csv("resultados/regressao/mlp_topologias.csv")
+    base = redes.BASE_MLP
+
+    def chave(camadas, ativacao, taxa, epocas):
+        return (
+            "-".join(str(n) for n in camadas), ativacao,
+            float(taxa), int(epocas)
+        )
+
+    por_config = {
+        (
+            linha["camadas"], linha["ativacao"],
+            float(linha["learning_rate"]), int(linha["epocas"])
+        ): linha
+        for linha in linhas
+    }
+
+    fatores = {
+        "camadas": ("Topologia", redes.TOPOLOGIAS_MLP),
+        "ativacao": ("Ativação", redes.ATIVACOES_MLP),
+        "taxa": ("Taxa η", redes.TAXAS_MLP),
+        "epocas": ("Épocas", redes.EPOCAS_MLP),
+    }
+    resultado = {}
+
+    for fator, (nome, valores) in fatores.items():
+        itens = []
+        divergiram = []
+
+        for valor in valores:
+            c = dict(base, **{fator: valor})
+            linha = por_config[
+                chave(c["camadas"], c["ativacao"], c["taxa"], c["epocas"])
+            ]
+
+            # Configurações que divergiram não entram no controle.
+            if linha["divergiu"] == "sim":
+                divergiram.append(str(valor))
+                continue
+
+            item = pares(linha, metricas)
+            item["padrao"] = valor == base[fator]
+            item["config"] = (
+                f"{linha['camadas']} · {c['ativacao']} · "
+                f"η = {c['taxa']} · {c['epocas']} épocas"
+            )
+            item["rotulo"] = (
+                linha["camadas"] if fator == "camadas" else str(valor)
+            )
+            itens.append(item)
+
+        resultado[fator] = {
+            "nome": nome,
+            "itens": itens,
+            "divergiram": divergiram,
+            "padrao": [item.pop("padrao") for item in itens].index(True)
+        }
+
+    return resultado
+
+
+def comparacao_zscore():
+    """
+    Métricas de cada algoritmo com e sem a padronização Z-score.
+    """
+
+    resultado = {}
+
+    for tarefa, metricas in (
+        ("classificacao", ("acuracia", "f1_macro")),
+        ("regressao", ("rmse", "mae", "r2")),
+    ):
+        resultado[tarefa] = {}
+
+        for linha in ler_csv(f"resultados/{tarefa}/zscore.csv"):
+            resultado[tarefa].setdefault(linha["modelo"], {})[linha["zscore"]] = (
+                None if linha["divergiu"] == "sim"
+                else {m: par(linha, m) for m in metricas}
+            )
+
+    return resultado
 
 
 def main():
@@ -48,9 +187,13 @@ def main():
         },
         "linear": {
             metrica: par(reg["linear"], metrica)
-            for metrica in ("mae", "r2", "r2_ajustado")
+            for metrica in ("mse", "rmse", "mae", "r2", "r2_ajustado")
         }
     }
+
+    dados["perceptron"] = varredura_perceptron()
+    dados["mlp"] = varredura_mlp()
+    dados["zscore"] = comparacao_zscore()
 
     X, y, _ = carregar_arff("datasets/classificacao/autoUniv-au1-1000.arff")
     dados["amostras_autouniv"] = [
