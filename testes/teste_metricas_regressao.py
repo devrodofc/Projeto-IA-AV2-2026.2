@@ -36,6 +36,8 @@ def main():
 
     print("\n========== RESULTADOS ==========")
 
+    print(f"MSE: {resultados['mse']:.4f}")
+    print(f"RMSE: {resultados['rmse']:.4f}")
     print(f"MAE: {resultados['mae']:.4f}")
     print(f"R²: {resultados['r2']:.4f}")
     print(
@@ -65,6 +67,8 @@ def main():
     )
 
     # Resultados esperados, calculados manualmente.
+    assert np.isclose(resultados["mse"], 0.8)
+    assert np.isclose(resultados["rmse"], np.sqrt(0.8))
     assert np.isclose(resultados["mae"], 0.8)
     assert np.isclose(resultados["r2"], 0.9)
     assert np.isclose(resultados["r2_ajustado"], 0.8)

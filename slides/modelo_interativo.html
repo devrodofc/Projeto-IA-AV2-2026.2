@@ -220,16 +220,19 @@ input[type="range"] { width: calc(var(--u) * 20); accent-color: var(--cyan); cur
 .pilulas button[aria-pressed="true"] { background: var(--blue); color: #fff; }
 .btn { border: 1px solid var(--frame-dark); }
 .btn:hover, .pilulas button:hover { color: #fff; }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+#s12 input[type="range"], #s13 input[type="range"] { width: calc(var(--u) * 11); }
+.controle select { font: inherit; letter-spacing: 0; text-transform: none; color: #fff; background: var(--navy-2); border: 1px solid var(--frame-dark); padding: 0 calc(var(--u) * 0.3); margin-left: calc(var(--u) * 0.4); cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
 .tabela-wrap { flex-shrink: 0; overflow-x: auto; border: 2px solid var(--frame-dark); background: var(--navy-2); }
 table.res { color: #dbe7f6; border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: calc(var(--u) * 1.3); font-variant-numeric: tabular-nums; }
-#s11 table.res { font-size: calc(var(--u) * 1.45); }
+#s13 table.res { font-size: calc(var(--u) * 1.45); }
 table.res th, table.res td { text-align: left; padding: calc(var(--u) * 0.55) calc(var(--u) * 0.9); white-space: nowrap; vertical-align: top; }
 table.res thead th { color: var(--muted-dark); font-weight: 600; border-bottom: 1px solid var(--line-dark); font-size: calc(var(--u) * 0.95); letter-spacing: 0.04em; }
 table.res tbody tr + tr td { border-top: 1px solid var(--line-dark); }
 table.res td:first-child { color: #fff; font-weight: 600; }
 table.res td small { display: block; font-size: calc(var(--u) * 0.9); font-weight: 400; color: var(--muted-dark); }
+table.zscore { font-size: calc(var(--u) * 1.35); }
 .d { display: block; font-size: calc(var(--u) * 0.95); }
 .d.bom { color: var(--good-dark); }
 .d.ruim { color: var(--bad-dark); }
@@ -367,8 +370,8 @@ html.apresentando .nav { display: none; }
   <div class="duas" style="margin-top:auto">
     <div class="caixa">
       <p class="rotulo">O que comparamos</p>
-      <p>Classificação: kNN (Euclidiana e Manhattan) e Bayes Univariado.</p>
-      <p style="margin-top:calc(var(--u)*1.2)">Regressão: kNN (Euclidiana e Manhattan) e Regressão Linear Múltipla.</p>
+      <p>Classificação: kNN (Euclidiana e Manhattan), Bayes Univariado e Perceptron Simples.</p>
+      <p style="margin-top:calc(var(--u)*1.2)">Regressão: kNN (Euclidiana e Manhattan), Regressão Linear Múltipla e MLP.</p>
     </div>
     <div class="caixa">
       <p class="rotulo">Por que importa</p>
@@ -490,6 +493,48 @@ html.apresentando .nav { display: none; }
 </section>
 
 <!-- 7 -->
+<section class="slide" data-titulo="Algoritmos — Perceptron Simples">
+  <h2>2. Algoritmos — Perceptron Simples</h2>
+  <div class="metodo">
+    <div class="lado">
+      <p class="grande" style="font-size:calc(var(--u)*2.7)">Um neurônio. Uma fronteira linear.</p>
+      <p><b>fit:</b> sorteia os pesos e, a cada época, percorre as amostras embaralhadas. Se a saída está errada, corrige os pesos na direção da amostra.</p>
+      <p><b>predict:</b> soma ponderada das entradas (mais o bias) e função degrau: 0 ou 1.</p>
+      <p>Hiperparâmetros: taxa de aprendizado η e número de épocas. Só converge se as classes forem linearmente separáveis.</p>
+      <div class="mini-formula"><span>Regra de aprendizado</span>y = degrau(wᵀx)<br>w ← w + η (d − y) x</div>
+    </div>
+    <div class="arquivo">
+      <span class="aba">src/classificacao/perceptron.py</span>
+<pre class="codigo" style="font-size:calc(var(--u)*1.2);line-height:1.4"><span class="kw">class</span> Perceptron:  <span class="cm"># Simples</span>
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X_train, y_train):
+        rng = np.random.default_rng(self.random_state)
+        self._classes = np.unique(y_train)
+        d = (y_train == self._classes[1]).astype(int)  <span class="cm"># 0 ou 1</span>
+        N = X_train.shape[0]
+        X_train = np.column_stack((np.ones(N), X_train))  <span class="cm"># bias</span>
+        self.w = rng.uniform(-0.5, 0.5, X_train.shape[1])
+        <span class="kw">for</span> _ <span class="kw">in</span> range(self.n_epochs):
+            errors = 0
+            <span class="kw">for</span> i <span class="kw">in</span> rng.permutation(N):
+                y = self.activation(X_train[i] @ self.w)
+                e = d[i] - y
+                <span class="kw">if</span> e != 0:  <span class="cm"># regra de aprendizado</span>
+                    self.w += self.learning_rate * e * X_train[i]
+                    errors += 1
+            <span class="kw">if</span> errors == 0:  <span class="cm"># convergiu</span>
+                <span class="kw">break</span>
+
+    <span class="kw">def</span> <span class="fn">activation</span>(self, u):  <span class="cm"># degrau</span>
+        <span class="kw">return</span> np.where(u &gt;= 0, 1, 0)
+
+    <span class="kw">def</span> <span class="fn">predict</span>(self, X_test):
+        X_test = np.column_stack((np.ones(len(X_test)), X_test))
+        <span class="kw">return</span> self._classes[self.activation(X_test @ self.w)]</pre>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
 <section class="slide" data-titulo="Algoritmos — Regressão Linear Múltipla">
   <h2>2. Algoritmos — Regressão Linear Múltipla</h2>
   <div class="metodo">
@@ -519,7 +564,53 @@ html.apresentando .nav { display: none; }
   </div>
 </section>
 
-<!-- 8 -->
+<!-- 9 -->
+<section class="slide" data-titulo="Algoritmos — MLP">
+  <h2>2. Algoritmos — Multi Layer Perceptron (MLP)</h2>
+  <div class="metodo">
+    <div class="lado">
+      <p class="grande" style="font-size:calc(var(--u)*2.7)">Camadas ocultas aprendem o que não é linear.</p>
+      <p><b>fit:</b> a cada mini-lote, calcula a saída (forward), mede o erro e o propaga de trás para frente (backpropagation), ajustando pesos e bias pelo gradiente.</p>
+      <p><b>predict:</b> só o forward. A saída é linear, pois o alvo é um número.</p>
+      <p>Hiperparâmetros: camadas ocultas, neurônios por camada, ativação (sigmoid, tanh ou ReLU), taxa de aprendizado η e épocas.</p>
+      <div class="mini-formula"><span>Backpropagation</span>δₗ = (δₗ₊₁ Wₗᵀ) ⊙ f′(aₗ)<br>Wₗ ← Wₗ − η aₗᵀ δₗ₊₁</div>
+    </div>
+    <div class="arquivo">
+      <span class="aba">src/regressao/mlp.py</span>
+<pre class="codigo" style="font-size:calc(var(--u)*1.1);line-height:1.35"><span class="kw">class</span> MLP:
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X_train, y_train):
+        <span class="cm"># ... padroniza o alvo (d) e sorteia W e b de cada camada</span>
+        <span class="kw">for</span> _ <span class="kw">in</span> range(self.n_epochs):
+            indices = rng.permutation(N)
+            <span class="kw">for</span> start <span class="kw">in</span> range(0, N, self.batch_size):
+                batch = indices[start:start + self.batch_size]
+                A = self.forward(X_train[batch])
+                delta = 2 * (A[-1] - d[batch]) / len(batch)
+                <span class="kw">for</span> l <span class="kw">in</span> reversed(range(len(self.W))):  <span class="cm"># backprop</span>
+                    grad_W = A[l].T @ delta
+                    grad_b = np.sum(delta, axis=0)
+                    <span class="kw">if</span> l &gt; 0:  <span class="cm"># erro da camada anterior</span>
+                        delta = ((delta @ self.W[l].T)
+                                 * self.derivative(A[l]))
+                    self.W[l] -= self.learning_rate * grad_W
+                    self.b[l] -= self.learning_rate * grad_b
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, X):  <span class="cm"># saída de cada camada</span>
+        A = [X]
+        <span class="kw">for</span> l <span class="kw">in</span> range(len(self.W)):
+            u = A[-1] @ self.W[l] + self.b[l]
+            last = l == len(self.W) - 1
+            A.append(u <span class="kw">if</span> last <span class="kw">else</span> self.activate(u))
+        <span class="kw">return</span> A
+
+    <span class="kw">def</span> <span class="fn">predict</span>(self, X_test):
+        y = self.forward(X_test)[-1].ravel()
+        <span class="kw">return</span> y * self._y_std + self._y_mean</pre>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
 <section class="slide" data-titulo="Validação cruzada K-Fold">
   <h2>3. Experimentos — Validação Cruzada K-Fold (k = 5)</h2>
   <div class="folds" style="margin-top:calc(var(--u)*2)">
@@ -533,7 +624,7 @@ html.apresentando .nav { display: none; }
   <div class="codigo" style="text-align:center;margin:auto auto 0;white-space:normal">seed 42 → permutation → 5 partições → 100% dos dados testados uma vez</div>
 </section>
 
-<!-- 9 -->
+<!-- 11 -->
 <section class="slide" data-titulo="Métricas">
   <h2>3.2 Métricas de Avaliação</h2>
   <div class="duas" style="flex:1">
@@ -555,14 +646,22 @@ html.apresentando .nav { display: none; }
   <p class="cinza" style="text-align:center;font-size:calc(var(--u)*1.25)">Todas implementadas manualmente com NumPy.</p>
 </section>
 
-<!-- 10 -->
-<section class="slide escuro" id="s10" data-titulo="Resultados de Classificação">
+<!-- 12 -->
+<section class="slide escuro" id="s12" data-titulo="Resultados de Classificação">
   <h2>3.3 Resultados de Classificação</h2>
-  <p class="sub">AutoUniv-au1-1000 · média ± desvio-padrão em 5 folds · mova o controle para ver o efeito de k</p>
+  <p class="sub">AutoUniv-au1-1000 · média ± desvio-padrão em 5 folds · mova os controles para ver o efeito dos hiperparâmetros</p>
   <div class="controles">
     <div class="controle">
       <label for="kc">k do kNN</label>
       <div class="linha"><input type="range" id="kc" min="0" max="9" step="1" value="1"><output id="kc-out" for="kc">k = 3</output></div>
+    </div>
+    <div class="controle">
+      <label for="pt">Perceptron · taxa</label>
+      <div class="linha"><input type="range" id="pt" min="0" max="4" step="1" value="4"><output id="pt-out" for="pt">η = 1</output></div>
+    </div>
+    <div class="controle">
+      <label for="pe">Perceptron · épocas</label>
+      <div class="linha"><input type="range" id="pe" min="0" max="6" step="1" value="6"><output id="pe-out" for="pe">200</output></div>
     </div>
     <button class="btn" id="cls-padrao" type="button">Voltar aos valores do trabalho</button>
   </div>
@@ -578,32 +677,38 @@ html.apresentando .nav { display: none; }
         <div class="chaves">
           <span class="chave" style="color:var(--cyan)">Acurácia</span>
           <span class="chave" style="color:var(--mint)">F1 macro</span>
-          <span class="chave tracejada" style="color:#e0a93b">Sempre a classe majoritária</span>
+          <span class="chave tracejada" style="color:#e0a93b">Classe majoritária</span>
         </div>
         <div class="pilulas" role="group" aria-label="Distância do gráfico">
           <button type="button" data-dist="euclidiana" aria-pressed="true">Euclidiana</button>
           <button type="button" data-dist="manhattan" aria-pressed="false">Manhattan</button>
+          <button type="button" data-dist="perceptron" aria-pressed="false">Perceptron</button>
         </div>
       </div>
-      <svg id="graf-cls" viewBox="0 0 560 230" role="img" aria-label="Acurácia e F1 do kNN conforme k"></svg>
+      <svg id="graf-cls" viewBox="0 0 560 230" role="img" aria-label="Acurácia e F1 conforme o hiperparâmetro"></svg>
     </div>
     <div class="veredito" id="ver-cls"></div>
   </div>
-  <p class="nota">* Tempo medido na configuração do trabalho. No kNN, o tempo de teste quase não muda com k: o custo é calcular e ordenar as distâncias para todo o treino.</p>
+  <p class="nota">* No kNN, tempo medido na configuração do trabalho: ele quase não muda com k, pois o custo é calcular e ordenar as distâncias para todo o treino. No Perceptron, o tempo de treino cresce com o número de épocas.</p>
 </section>
 
-<!-- 11 -->
-<section class="slide escuro" id="s11" data-titulo="Resultados de Regressão">
+<!-- 13 -->
+<section class="slide escuro" id="s13" data-titulo="Resultados de Regressão">
   <h2>3.3 Resultados de Regressão</h2>
-  <p class="sub">Wine Quality · média ± desvio-padrão em 5 folds · mova o controle para ver o efeito de k</p>
+  <p class="sub">Wine Quality · média ± desvio-padrão em 5 folds · mova os controles para ver o efeito dos hiperparâmetros</p>
   <div class="controles">
     <div class="controle">
       <label for="kr">k do kNN</label>
       <div class="linha"><input type="range" id="kr" min="0" max="9" step="1" value="2"><output id="kr-out" for="kr">k = 5</output></div>
     </div>
-    <div class="pilulas" role="group" aria-label="Distância do gráfico">
+    <div class="controle">
+      <label for="mi">MLP · variar <select id="mf" aria-label="Hiperparâmetro do MLP a variar"></select></label>
+      <div class="linha"><input type="range" id="mi" min="0" max="7" step="1" value="3"><output id="mi-out" for="mi">64</output></div>
+    </div>
+    <div class="pilulas" role="group" aria-label="Modelo analisado no gráfico">
       <button type="button" data-dist="euclidiana" aria-pressed="false">Euclidiana</button>
       <button type="button" data-dist="manhattan" aria-pressed="true">Manhattan</button>
+      <button type="button" data-dist="mlp" aria-pressed="false">MLP</button>
     </div>
     <button class="btn" id="reg-padrao" type="button">Voltar aos valores do trabalho</button>
   </div>
@@ -616,20 +721,17 @@ html.apresentando .nav { display: none; }
   <div class="analise">
     <div class="grafico">
       <div class="duplo">
-        <div><p class="mini-titulo">MAE (menor é melhor)</p><svg id="graf-mae" viewBox="0 0 300 210" role="img" aria-label="MAE do kNN conforme k"></svg></div>
-        <div><p class="mini-titulo">R² (maior é melhor)</p><svg id="graf-r2" viewBox="0 0 300 210" role="img" aria-label="R² do kNN conforme k"></svg></div>
+        <div><p class="mini-titulo">MAE (menor é melhor)</p><svg id="graf-mae" viewBox="0 0 300 210" role="img" aria-label="MAE conforme o hiperparâmetro"></svg></div>
+        <div><p class="mini-titulo">R² (maior é melhor)</p><svg id="graf-r2" viewBox="0 0 300 210" role="img" aria-label="R² conforme o hiperparâmetro"></svg></div>
       </div>
-      <div class="chaves">
-        <span class="chave" style="color:var(--cyan)">kNN com a distância escolhida</span>
-        <span class="chave tracejada" style="color:#e0a93b">Regressão Linear (sem hiperparâmetro)</span>
-      </div>
+      <div class="chaves" id="chaves-reg"></div>
     </div>
     <div class="veredito" id="ver-reg"></div>
   </div>
-  <p class="nota">* Tempo medido na configuração do trabalho; no kNN ele quase não depende de k.</p>
+  <p class="nota">* No kNN, tempo medido na configuração do trabalho (quase não depende de k). No MLP, o tempo é o de cada configuração.</p>
 </section>
 
-<!-- 12 -->
+<!-- 14 -->
 <section class="slide escuro" data-titulo="Análise crítica">
   <h2>Análise Crítica: Desempenho vs. Eficiência</h2>
   <div class="duas">
@@ -638,18 +740,20 @@ html.apresentando .nav { display: none; }
       <p>Acurácia: Bayes 0.722 ≈ kNN 0.714.</p>
       <p>F1 macro: kNN 0.593 &gt; Bayes 0.566. O kNN acerta mais a classe minoritária.</p>
       <p>Teste: Bayes 0.005 s vs. kNN ~0.45 s (≈100× mais rápido).</p>
+      <p>Perceptron: acurácia 0.670 e F1 0.570. Não converge, pois as classes não são linearmente separáveis.</p>
     </div>
     <div class="caixa">
       <p class="rotulo">Regressores (R² e MAE)</p>
       <p>kNN Manhattan: MAE 0.522 e R² 0.360.</p>
       <p>Regressão Linear: MAE 0.570 e R² 0.288.</p>
-      <p>Teste: Linear &lt; 1 ms vs. kNN ~18–20 s por fold; treino do kNN ≈ 0 s (só armazena).</p>
+      <p>MLP: MAE 0.537 e R² 0.371, o maior R². Treino ~0.7 s por fold.</p>
+      <p>Teste: Linear e MLP &lt; 1 ms vs. kNN ~24–25 s por fold; treino do kNN ≈ 0 s (só armazena).</p>
     </div>
   </div>
-  <p class="fecho" style="margin-top:auto">kNN: simples e sem suposições sobre os dados, mas a previsão escala mal com o tamanho do treino. Bayes e Regressão Linear: rápidos e interpretáveis, mas assumem independência entre atributos e relação linear.</p>
+  <p class="fecho" style="margin-top:auto">kNN: simples e sem suposições sobre os dados, mas a previsão escala mal com o tamanho do treino. Bayes e Regressão Linear: rápidos e interpretáveis, mas assumem independência entre atributos e relação linear. MLP: aprende relações não lineares e prevê rápido, mas tem vários hiperparâmetros para ajustar.</p>
 </section>
 
-<!-- 13 -->
+<!-- 15 -->
 <section class="slide escuro" data-titulo="Ajuste de hiperparâmetros">
   <h2>Ajuste de Hiperparâmetros: aumentar sempre ajuda?</h2>
   <p class="sub">Não. Cada métrica tem seu melhor valor, e passar dele piora o modelo.</p>
@@ -670,24 +774,115 @@ html.apresentando .nav { display: none; }
   <p class="fecho" style="margin-top:auto">Aumentar k reduz a variância e aumenta o viés. O ponto ótimo depende da métrica escolhida, por isso a métrica deve ser definida antes de ajustar.</p>
 </section>
 
-<!-- 14 -->
+<!-- 16 -->
+<section class="slide escuro" data-titulo="Ajuste de hiperparâmetros — redes neurais">
+  <h2>Ajuste de Hiperparâmetros: Perceptron e MLP</h2>
+  <p class="sub">No Perceptron não há tendência. No MLP, rede maior e mais épocas passam a decorar o treino.</p>
+  <div class="duas">
+    <div class="caixa">
+      <p class="rotulo">Taxa de aprendizado e épocas · Perceptron</p>
+      <p>Nas 35 combinações o F1 fica entre 0.488 e 0.570, sem tendência: mais épocas ou outra taxa não melhoram de forma consistente.</p>
+      <p>As classes não são linearmente separáveis. O Perceptron não converge e o resultado depende de onde os pesos estavam quando o treino parou.</p>
+      <p><b>Usado: η = 1.0 e 200 épocas (maior F1 médio).</b></p>
+    </div>
+    <div class="caixa">
+      <p class="rotulo">Topologia, ativação, taxa e épocas · MLP</p>
+      <p>Topologia: de 8 para 64 neurônios o R² sobe de 0.339 para 0.371. A melhor foi 32-16 (0.378). Com 64-32 o R² de treino vai a 0.532 e o de teste não melhora (0.370).</p>
+      <p>Ativação: ReLU 0.371 &gt; tanh 0.365 &gt; sigmoid 0.329. Taxa: 0.01 é a melhor; 0.1 piora (0.290) e 0.3 diverge.</p>
+      <p>Épocas: o R² de teste sobe até 100 (0.371) e cai com 400 (0.334), enquanto o de treino continua subindo (0.514).</p>
+      <p><b>Usado: 64 neurônios, ReLU, η = 0.01 e 100 épocas.</b></p>
+    </div>
+  </div>
+  <p class="fecho" style="margin-top:auto">No MLP, a distância entre o R² de treino e o de teste mede a generalização: quando ela cresce, o modelo está sobreajustando.</p>
+</section>
+
+<!-- 17 -->
+<section class="slide escuro" data-titulo="Z-score — justificativa">
+  <h2>Z-score: Por Que e Onde Aplicamos</h2>
+  <p class="sub">z = (x − μ) / σ · cada atributo passa a ter média 0 e desvio-padrão 1</p>
+  <div class="duas">
+    <div class="caixa">
+      <p class="rotulo">Por que usamos</p>
+      <p>No Wine Quality os atributos têm escalas muito diferentes: o SO₂ total vai de 6 a 440 e a densidade de 0.987 a 1.039.</p>
+      <p>O kNN mede distâncias: sem padronizar, o atributo de maior escala decide sozinho quem é vizinho.</p>
+      <p>Perceptron e MLP somam entradas ponderadas: escalas diferentes desequilibram o ajuste dos pesos e saturam as ativações.</p>
+    </div>
+    <div class="caixa">
+      <p class="rotulo">Em que etapa</p>
+      <p>Dentro de cada fold, logo depois da divisão em treino e teste.</p>
+      <p>μ e σ são calculados só no treino. O teste é transformado com esses mesmos valores, sem vazamento de dados.</p>
+      <p>Aplicado aos atributos de todos os algoritmos, nas duas bases. O alvo não passa por esse pré-processamento.</p>
+    </div>
+  </div>
+  <p class="fecho" style="margin-top:auto">Todos os algoritmos recebem os dados no mesmo formato, o que mantém a comparação justa.</p>
+</section>
+
+<!-- 18 -->
+<section class="slide escuro" data-titulo="Z-score — impacto">
+  <h2>Z-score: Impacto nos Algoritmos</h2>
+  <p class="sub">Mesmos 5 folds e hiperparâmetros · só muda a presença da padronização</p>
+  <div class="duas" style="gap:calc(var(--u)*2.4)">
+    <div style="display:grid;gap:calc(var(--u)*0.8)">
+      <p class="rotulo">Classificação · AutoUniv-au1-1000</p>
+      <div class="tabela-wrap">
+        <table class="res zscore">
+          <thead><tr><th>CLASSIFICADOR</th><th>F1 COM</th><th>F1 SEM</th><th>ACUR. COM</th><th>ACUR. SEM</th></tr></thead>
+          <tbody id="z-cls"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:grid;gap:calc(var(--u)*0.8)">
+      <p class="rotulo">Regressão · Wine Quality</p>
+      <div class="tabela-wrap">
+        <table class="res zscore">
+          <thead><tr><th>REGRESSOR</th><th>R² COM</th><th>R² SEM</th><th>RMSE COM</th><th>RMSE SEM</th></tr></thead>
+          <tbody id="z-reg"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="fecho" style="margin-top:auto">kNN e MLP dependem da escala dos atributos. Bayes e Regressão Linear dão exatamente o mesmo resultado.</p>
+</section>
+
+<!-- 19 -->
+<section class="slide escuro" data-titulo="Z-score — discussão e conclusão">
+  <h2>Z-score: Discussão e Conclusão Crítica</h2>
+  <div class="duas">
+    <div class="caixa">
+      <p class="rotulo">Discussão dos resultados</p>
+      <p>Neutro para Bayes e Regressão Linear: média e variância por atributo e os coeficientes β se ajustam à escala, e a previsão não muda.</p>
+      <p>Decisivo na regressão: sem Z-score o R² do kNN cai de 0.36 para 0.16–0.18 e o do MLP de 0.371 para 0.00, o mesmo que prever sempre a média.</p>
+      <p>Pequeno na classificação: os atributos já são 0 ou 1. O kNN ganha 0.016 de F1. O Perceptron sem Z-score tem acurácia maior (0.712), mas por prever mais a classe majoritária: o F1 cai de 0.570 para 0.490.</p>
+    </div>
+    <div class="caixa">
+      <p class="rotulo">Conclusão crítica</p>
+      <p>O uso foi adequado: pelo F1 e pelo R², o Z-score melhorou ou manteve o resultado de todos os algoritmos, e sem ele kNN e MLP não funcionam no Wine Quality.</p>
+      <p>Ajustes possíveis: dispensar a padronização no Bayes e na Regressão Linear, onde ela não tem efeito, e avaliar o AutoUniv sem ela, já que os atributos são binários.</p>
+      <p>Alternativas: Min-Max, ou uma escala robusta (mediana e intervalo interquartil) para os atributos do vinho com valores extremos, como o açúcar residual (até 65.8).</p>
+    </div>
+  </div>
+  <p class="fecho" style="margin-top:auto">Z-score: indispensável para kNN e MLP quando os atributos têm escalas diferentes, e neutro para Bayes e Regressão Linear.</p>
+</section>
+
+<!-- 20 -->
 <section class="slide escuro" data-titulo="Conclusões">
   <h2>4. Conclusões</h2>
   <div class="duas" style="grid-template-columns:0.8fr 1.2fr;flex:1">
     <div style="display:grid;gap:calc(var(--u)*3);align-content:start">
-      <p class="grande" style="font-size:calc(var(--u)*3.3);line-height:1.1">Melhor equilíbrio: Bayes Univariado e Regressão Linear.</p>
+      <p class="grande" style="font-size:calc(var(--u)*3.3);line-height:1.1">Melhor equilíbrio: Bayes Univariado e MLP.</p>
       <div style="height:calc(var(--u)*0.7);background:var(--cyan);width:85%"></div>
     </div>
     <div style="display:grid;gap:calc(var(--u)*1.3);color:#e6f0fb">
-      <p>Melhor desempenho: kNN no F1 da classificação (0.593; 0.604 com k = 5) e kNN Manhattan na regressão (MAE 0.522, R² 0.360; R² 0.369 com k = 11).</p>
-      <p>Mais rápidos: Bayes Univariado (0.005 s de teste) e Regressão Linear (&lt; 1 ms).</p>
-      <p>Vale a pena? Na classificação, o Bayes entrega acurácia equivalente ~100× mais rápido. Na regressão, o kNN ganha +0.07 de R² ao custo de ~18 s por fold; compensa só se a previsão não precisar ser em tempo real.</p>
-      <p>Limitações: dataset de classificação artificial, ruidoso e desbalanceado (prever sempre a classe majoritária daria 0.741 de acurácia); R² moderado no Wine Quality; k escolhido sem validação aninhada.</p>
+      <p>Melhor desempenho: kNN no F1 da classificação (0.593; 0.604 com k = 5) e MLP na regressão (R² 0.371 e RMSE 0.692). O menor MAE é do kNN Manhattan (0.522).</p>
+      <p>Mais rápidos no teste: Bayes Univariado (0.005 s), Regressão Linear e MLP (&lt; 1 ms).</p>
+      <p>Vale a pena? Na classificação, o Bayes entrega acurácia equivalente ~100× mais rápido. Na regressão, o MLP iguala o kNN prevendo em menos de 1 ms, contra ~25 s por fold, ao custo de ~0.7 s de treino.</p>
+      <p>Z-score: indispensável para kNN e MLP no Wine Quality e neutro para Bayes e Regressão Linear.</p>
+      <p>Limitações: dataset de classificação artificial, ruidoso e desbalanceado (prever sempre a classe majoritária daria 0.741 de acurácia), no qual o Perceptron não converge; R² moderado no Wine Quality; hiperparâmetros escolhidos sem validação aninhada.</p>
     </div>
   </div>
 </section>
 
-<!-- 15 -->
+<!-- 21 -->
 <section class="slide escuro refs" data-titulo="Referências">
   <h2>5. Referências</h2>
   <div style="display:grid;gap:calc(var(--u)*1.4)">
@@ -719,8 +914,13 @@ html.apresentando .nav { display: none; }
   const C = D.classificacao;
   const R = D.regressao;
   const T = D.tempos;
-  const PADRAO = { kc: K.indexOf(3), kr: K.indexOf(5) };
-  const estado = { kc: PADRAO.kc, kr: PADRAO.kr, dc: "euclidiana", dr: "manhattan" };
+  const P = D.perceptron;
+  const M = D.mlp;
+  const PADRAO = { kc: K.indexOf(3), kr: K.indexOf(5), pt: P.padrao.taxa, pe: P.padrao.epocas };
+  const estado = {
+    kc: PADRAO.kc, kr: PADRAO.kr, dc: "euclidiana", dr: "manhattan",
+    pt: PADRAO.pt, pe: PADRAO.pe, mf: "camadas", mi: M.camadas.padrao,
+  };
 
   const f3 = (v) => v.toFixed(3);
   const md = (par) => `${f3(par[0])} ± ${f3(par[1])}`;
@@ -732,8 +932,18 @@ html.apresentando .nav { display: none; }
     return `<span class="d ${bom ? "bom" : "ruim"}">${d > 0 ? "+" : "−"}${f3(Math.abs(d))} vs. ${rotuloRef}</span>`;
   }
 
+  // Limites do eixo Y arredondados para o passo
+  function escala(valores, passo) {
+    return {
+      yMin: Math.floor(Math.min(...valores) / passo + 1e-9) * passo,
+      yMax: Math.ceil(Math.max(...valores) / passo - 1e-9) * passo,
+      passoY: passo,
+    };
+  }
+
   // ---------- Classificação ----------
   const METRICAS_CLS = ["acuracia", "precisao_macro", "recall_macro", "f1_macro"];
+  const celulaP = (taxa, epocas) => P.grade[`${taxa}|${epocas}`];
 
   function linhaCls(nome, dados, ref, rotuloRef, tempos, detalhe) {
     const celulas = METRICAS_CLS.map((m) =>
@@ -744,22 +954,52 @@ html.apresentando .nav { display: none; }
 
   function renderCls() {
     const k = K[estado.kc];
+    const taxa = P.taxas[estado.pt], epocas = P.epocas[estado.pe];
+    const per = celulaP(estado.pt, estado.pe);
     document.getElementById("kc-out").textContent = `k = ${k}`;
+    document.getElementById("pt-out").textContent = `η = ${taxa}`;
+    document.getElementById("pe-out").textContent = `${epocas}`;
     const mudouK = estado.kc !== PADRAO.kc;
+    const mudouP = estado.pt !== PADRAO.pt || estado.pe !== PADRAO.pe;
     document.getElementById("cls-corpo").innerHTML =
       linhaCls(`kNN (Euclidiana)<small>k = ${k}</small>`, C.knn_euclidiana[k], C.knn_euclidiana["3"], "k=3", T.cls.knn_euclidiana, mudouK) +
       linhaCls(`kNN (Manhattan)<small>k = ${k}</small>`, C.knn_manhattan[k], C.knn_manhattan["3"], "k=3", T.cls.knn_manhattan, mudouK) +
-      linhaCls(`Bayes Univariado<small>sem hiperparâmetro</small>`, C.bayes, C.bayes, "", T.cls.bayes_univariado, false);
+      linhaCls(`Bayes Univariado<small>sem hiperparâmetro</small>`, C.bayes, C.bayes, "", T.cls.bayes_univariado, false) +
+      linhaCls(`Perceptron Simples<small>η = ${taxa} · ${epocas} épocas</small>`, per, celulaP(PADRAO.pt, PADRAO.pe), "trabalho", per, mudouP);
+
+    const svg = document.getElementById("graf-cls");
+    const base = { valor: C.baseline_acuracia, texto: "0.741" };
+
+    if (estado.dc === "perceptron") {
+      const acuracia = P.epocas.map((_, e) => celulaP(estado.pt, e).acuracia[0]);
+      const f1 = P.epocas.map((_, e) => celulaP(estado.pt, e).f1_macro[0]);
+      grafico(svg, {
+        rotulosX: P.epocas.map(String), tituloX: "",
+        series: [{ valores: acuracia, cor: "var(--cyan)" }, { valores: f1, cor: "var(--mint)" }],
+        yMin: 0.4, yMax: 0.8, passoY: 0.1, marca: estado.pe, base: base,
+      });
+
+      let melhor = null;
+      P.taxas.forEach((_, t) => P.epocas.forEach((_, e) => {
+        const v = celulaP(t, e).f1_macro[0];
+        if (!melhor || v > melhor.v) melhor = { t: t, e: e, v: v };
+      }));
+      document.getElementById("ver-cls").innerHTML =
+        `<h3>Se aumentar as épocas (Perceptron, η = ${taxa}, ${epocas} épocas)</h3>` +
+        veredito("Acurácia", acuracia, estado.pe, true, P.epocas, "nº de épocas") +
+        veredito("F1 macro", f1, estado.pe, true, P.epocas, "nº de épocas") +
+        `<div class="item"><b>Melhor combinação pelo F1:</b> η = ${P.taxas[melhor.t]} com ${P.epocas[melhor.e]} épocas (${f3(melhor.v)}). Não há tendência clara: as classes não são linearmente separáveis e o Perceptron não converge.</div>`;
+      return;
+    }
 
     const serie = C["knn_" + estado.dc];
-    grafico(document.getElementById("graf-cls"), {
+    grafico(svg, {
       rotulosX: K.map(String), tituloX: "k",
       series: [
         { valores: K.map((x) => serie[x].acuracia[0]), cor: "var(--cyan)" },
         { valores: K.map((x) => serie[x].f1_macro[0]), cor: "var(--mint)" },
       ],
-      yMin: 0.4, yMax: 0.8, passoY: 0.1, marca: estado.kc,
-      base: { valor: C.baseline_acuracia, texto: "0.741" },
+      yMin: 0.4, yMax: 0.8, passoY: 0.1, marca: estado.kc, base: base,
     });
 
     const nomeDist = estado.dc === "euclidiana" ? "Euclidiana" : "Manhattan";
@@ -771,31 +1011,75 @@ html.apresentando .nav { display: none; }
   }
 
   // ---------- Regressão ----------
+  const SIMBOLO_MLP = { camadas: "topologia", ativacao: "ativação", taxa: "η", epocas: "nº de épocas" };
+  const chave = (cor, texto, tracejada) =>
+    `<span class="chave${tracejada ? " tracejada" : ""}" style="color:${cor}">${texto}</span>`;
+
   function renderReg() {
     const k = K[estado.kr];
+    const fator = M[estado.mf];
+    const mlp = fator.itens[estado.mi];
     document.getElementById("kr-out").textContent = `k = ${k}`;
+    document.getElementById("mi").max = fator.itens.length - 1;
+    document.getElementById("mi").value = estado.mi;
+    document.getElementById("mi-out").textContent = mlp.rotulo;
     const mudou = estado.kr !== PADRAO.kr;
-    const linha = (nome, d, ref, tempos, detalhe) =>
+    const linha = (nome, d, ref, tempos, detalhe, rotuloRef) =>
       `<tr><td>${nome}</td>` +
-      `<td>${md(d.mae)}${detalhe ? delta(d.mae[0], ref.mae[0], false, "k=5") : ""}</td>` +
-      `<td>${md(d.r2)}${detalhe ? delta(d.r2[0], ref.r2[0], true, "k=5") : ""}</td>` +
-      `<td>${md(d.r2_ajustado)}${detalhe ? delta(d.r2_ajustado[0], ref.r2_ajustado[0], true, "k=5") : ""}</td>` +
+      `<td>${md(d.mae)}${detalhe ? delta(d.mae[0], ref.mae[0], false, rotuloRef) : ""}</td>` +
+      `<td>${md(d.r2)}${detalhe ? delta(d.r2[0], ref.r2[0], true, rotuloRef) : ""}</td>` +
+      `<td>${md(d.r2_ajustado)}${detalhe ? delta(d.r2_ajustado[0], ref.r2_ajustado[0], true, rotuloRef) : ""}</td>` +
       `<td>${md(tempos.treino)}</td><td>${md(tempos.teste)}</td></tr>`;
     document.getElementById("reg-corpo").innerHTML =
-      linha("Regressão Linear<small>sem hiperparâmetro</small>", T.linear, T.linear, T.reg.linear, false) +
-      linha(`kNN (Euclidiana)<small>k = ${k}</small>`, R.knn_euclidiana[k], R.knn_euclidiana["5"], T.reg.knn_euclidiana, mudou) +
-      linha(`kNN (Manhattan)<small>k = ${k}</small>`, R.knn_manhattan[k], R.knn_manhattan["5"], T.reg.knn_manhattan, mudou);
+      linha("Regressão Linear<small>sem hiperparâmetro</small>", T.linear, T.linear, T.reg.linear, false, "") +
+      linha(`kNN (Euclidiana)<small>k = ${k}</small>`, R.knn_euclidiana[k], R.knn_euclidiana["5"], T.reg.knn_euclidiana, mudou, "k=5") +
+      linha(`kNN (Manhattan)<small>k = ${k}</small>`, R.knn_manhattan[k], R.knn_manhattan["5"], T.reg.knn_manhattan, mudou, "k=5") +
+      linha(`MLP<small>${mlp.config}</small>`, mlp, fator.itens[fator.padrao], mlp, estado.mi !== fator.padrao, "trabalho");
+
+    const svgMae = document.getElementById("graf-mae");
+    const svgR2 = document.getElementById("graf-r2");
+    const baseLinear = (m) => ({ valor: T.linear[m][0], texto: "linear" });
+    const chaveLinear = chave("#e0a93b", "Regressão Linear (sem hiperparâmetro)", true);
+
+    if (estado.dr === "mlp") {
+      const rotulos = fator.itens.map((i) => i.rotulo);
+      const mae = fator.itens.map((i) => i.mae[0]);
+      const r2 = fator.itens.map((i) => i.r2[0]);
+      const r2Treino = fator.itens.map((i) => i.r2_treino[0]);
+      const comum = { rotulosX: rotulos, tituloX: "", marca: estado.mi, compacto: true };
+      grafico(svgMae, Object.assign({}, comum, escala(mae.concat(T.linear.mae[0]), 0.05), {
+        series: [{ valores: mae, cor: "var(--cyan)" }], base: baseLinear("mae"),
+      }));
+      grafico(svgR2, Object.assign({}, comum, escala(r2.concat(r2Treino, T.linear.r2[0]), 0.05), {
+        series: [{ valores: r2Treino, cor: "var(--mint)" }, { valores: r2, cor: "var(--cyan)" }], base: baseLinear("r2"),
+      }));
+      document.getElementById("chaves-reg").innerHTML =
+        chave("var(--cyan)", "MLP no teste") + chave("var(--mint)", "MLP no treino (R²)") + chaveLinear;
+
+      const simbolo = SIMBOLO_MLP[estado.mf];
+      const divergiu = fator.divergiram.length
+        ? ` Com ${simbolo} = ${fator.divergiram.join(" e ")} o treinamento divergiu.` : "";
+      document.getElementById("ver-reg").innerHTML =
+        `<h3>MLP · variando ${fator.nome.toLowerCase()} (agora ${mlp.rotulo})</h3>` +
+        veredito("MAE", mae, estado.mi, false, rotulos, simbolo) +
+        veredito("R²", r2, estado.mi, true, rotulos, simbolo) +
+        `<div class="item"><b>Generalização:</b> R² ${f3(mlp.r2_treino[0])} no treino e ${f3(mlp.r2[0])} no teste ` +
+        `(diferença ${f3(mlp.r2_treino[0] - mlp.r2[0])}). Treino em ${mlp.treino[0].toFixed(2)} s por fold.${divergiu}</div>`;
+      return;
+    }
 
     const serie = R["knn_" + estado.dr];
     const comum = { rotulosX: K.map(String), tituloX: "k", marca: estado.kr, compacto: true };
-    grafico(document.getElementById("graf-mae"), Object.assign({}, comum, {
+    grafico(svgMae, Object.assign({}, comum, {
       series: [{ valores: K.map((x) => serie[x].mae[0]), cor: "var(--cyan)" }],
-      yMin: 0.4, yMax: 0.6, passoY: 0.05, base: { valor: T.linear.mae[0], texto: "linear" },
+      yMin: 0.4, yMax: 0.6, passoY: 0.05, base: baseLinear("mae"),
     }));
-    grafico(document.getElementById("graf-r2"), Object.assign({}, comum, {
+    grafico(svgR2, Object.assign({}, comum, {
       series: [{ valores: K.map((x) => serie[x].r2[0]), cor: "var(--cyan)" }],
-      yMin: 0.15, yMax: 0.4, passoY: 0.05, base: { valor: T.linear.r2[0], texto: "linear" },
+      yMin: 0.15, yMax: 0.4, passoY: 0.05, base: baseLinear("r2"),
     }));
+    document.getElementById("chaves-reg").innerHTML =
+      chave("var(--cyan)", "kNN com a distância escolhida") + chaveLinear;
 
     const nomeDist = estado.dr === "euclidiana" ? "Euclidiana" : "Manhattan";
     document.getElementById("ver-reg").innerHTML =
@@ -828,7 +1112,9 @@ html.apresentando .nav { display: none; }
   function grafico(svg, o) {
     const vb = svg.viewBox.baseVal;
     const W = vb.width, H = vb.height;
-    const m = { l: 40, r: o.compacto ? 12 : 54, t: 12, b: 30 };
+    // Rótulos longos (topologias) alternam em duas linhas para não se sobrepor
+    const alterna = o.rotulosX.some((r) => r.length > 4);
+    const m = { l: 40, r: o.compacto ? 12 : 54, t: 12, b: alterna ? 42 : 30 };
     const n = o.rotulosX.length;
     const x = (i) => m.l + (i * (W - m.l - m.r)) / (n - 1);
     const y = (v) => m.t + ((o.yMax - v) * (H - m.t - m.b)) / (o.yMax - o.yMin);
@@ -838,7 +1124,7 @@ html.apresentando .nav { display: none; }
       s += `<text class="rot" x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(2)}</text>`;
     }
     o.rotulosX.forEach((r, i) => {
-      s += `<text class="rot" x="${x(i)}" y="${H - m.b + 16}" text-anchor="middle">${r}</text>`;
+      s += `<text class="rot" x="${x(i)}" y="${H - m.b + 16 + (alterna && i % 2 ? 12 : 0)}" text-anchor="middle">${r}</text>`;
     });
     s += `<text class="rot" x="${W - m.r + 4}" y="${H - m.b + 16}">${o.tituloX}</text>`;
     s += `<line class="marca" x1="${x(o.marca)}" x2="${x(o.marca)}" y1="${m.t}" y2="${H - m.b}"/>`;
@@ -859,34 +1145,83 @@ html.apresentando .nav { display: none; }
   }
 
   // ---------- Controles ----------
-  const liga = (id, chave, render) => {
+  // Escolhe o modelo analisado no gráfico e marca a pílula correspondente
+  function focar(secao, valor) {
+    estado[secao === "s12" ? "dc" : "dr"] = valor;
+    document.querySelectorAll(`#${secao} [data-dist]`).forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.dist === valor)));
+  }
+  // Mover um controle leva o gráfico para o modelo daquele controle
+  const liga = (id, chave, render, secao, foco) => {
     document.getElementById(id).addEventListener("input", (e) => {
       estado[chave] = Number(e.target.value);
+      const atual = estado[secao === "s12" ? "dc" : "dr"];
+      if (foco ? atual !== foco : atual === (secao === "s12" ? "perceptron" : "mlp")) {
+        focar(secao, foco || (secao === "s12" ? "euclidiana" : "manhattan"));
+      }
       render();
     });
   };
-  liga("kc", "kc", renderCls);
-  liga("kr", "kr", renderReg);
+  liga("kc", "kc", renderCls, "s12", null);
+  liga("pt", "pt", renderCls, "s12", "perceptron");
+  liga("pe", "pe", renderCls, "s12", "perceptron");
+  liga("kr", "kr", renderReg, "s13", null);
+  liga("mi", "mi", renderReg, "s13", "mlp");
 
-  document.querySelectorAll("#s10 [data-dist], #s11 [data-dist]").forEach((b) => {
+  const seletor = document.getElementById("mf");
+  seletor.innerHTML = Object.keys(M).map((f) => `<option value="${f}">${M[f].nome}</option>`).join("");
+  seletor.addEventListener("change", () => {
+    estado.mf = seletor.value;
+    estado.mi = M[estado.mf].padrao;
+    focar("s13", "mlp");
+    renderReg();
+  });
+
+  document.querySelectorAll("#s12 [data-dist], #s13 [data-dist]").forEach((b) => {
     b.addEventListener("click", () => {
       const sec = b.closest("section").id;
-      const chave = sec === "s10" ? "dc" : "dr";
-      estado[chave] = b.dataset.dist;
-      b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      sec === "s10" ? renderCls() : renderReg();
+      focar(sec, b.dataset.dist);
+      sec === "s12" ? renderCls() : renderReg();
     });
   });
   document.getElementById("cls-padrao").addEventListener("click", () => {
-    estado.kc = PADRAO.kc;
+    estado.kc = PADRAO.kc; estado.pt = PADRAO.pt; estado.pe = PADRAO.pe;
     document.getElementById("kc").value = PADRAO.kc;
+    document.getElementById("pt").value = PADRAO.pt;
+    document.getElementById("pe").value = PADRAO.pe;
     renderCls();
   });
   document.getElementById("reg-padrao").addEventListener("click", () => {
     estado.kr = PADRAO.kr;
+    estado.mi = M[estado.mf].padrao;
     document.getElementById("kr").value = PADRAO.kr;
     renderReg();
   });
+
+  // ---------- Z-score: com e sem a padronização ----------
+  (function () {
+    // Diferença do resultado sem Z-score em relação ao resultado com Z-score
+    const variacao = (d, maior) => Math.abs(d) < 0.0005
+      ? `<span class="d igual">igual</span>`
+      : `<span class="d ${(maior ? d > 0 : d < 0) ? "bom" : "ruim"}">${d > 0 ? "+" : "−"}${f3(Math.abs(d))}</span>`;
+    const corpo = (modelos, dados, metricas) => modelos.map(([chave, nome]) => {
+      const com = dados[chave].com, sem = dados[chave].sem;
+      return `<tr><td>${nome}</td>` + metricas.map(([m, maior]) =>
+        `<td>${f3(com[m][0])}</td>` +
+        `<td>${sem ? f3(sem[m][0]) + variacao(sem[m][0] - com[m][0], maior) : "divergiu"}</td>`
+      ).join("") + "</tr>";
+    }).join("");
+    document.getElementById("z-cls").innerHTML = corpo(
+      [["knn_euclidiana", "kNN (Euclidiana)"], ["knn_manhattan", "kNN (Manhattan)"],
+       ["bayes_univariado", "Bayes Univariado"], ["perceptron", "Perceptron Simples"]],
+      D.zscore.classificacao, [["f1_macro", true], ["acuracia", true]]
+    );
+    document.getElementById("z-reg").innerHTML = corpo(
+      [["linear", "Regressão Linear"], ["knn_euclidiana", "kNN (Euclidiana)"],
+       ["knn_manhattan", "kNN (Manhattan)"], ["mlp", "MLP"]],
+      D.zscore.regressao, [["r2", true], ["rmse", false]]
+    );
+  })();
 
   // ---------- Slides 3 e 4: dados reais ----------
   const bits = document.getElementById("bits");
@@ -967,7 +1302,7 @@ html.apresentando .nav { display: none; }
   document.getElementById("ant").addEventListener("click", () => mostrar(atual - 1));
   document.getElementById("prox").addEventListener("click", () => mostrar(atual + 1));
   document.addEventListener("keydown", (e) => {
-    if (e.target.matches("input")) return;
+    if (e.target.matches("input, select")) return;
     if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); mostrar(atual + 1); }
     if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); mostrar(atual - 1); }
     if (e.key === "Home") mostrar(0);
@@ -1008,7 +1343,7 @@ html.apresentando .nav { display: none; }
   // Clicar no slide avança, exceto em controles, tabelas e gráficos
   document.getElementById("deck").addEventListener("click", (e) => {
     if (!raiz.classList.contains("apresentando")) return;
-    if (e.target.closest("button, input, label, .controles, .tabela-wrap, .grafico, .pilulas")) return;
+    if (e.target.closest("button, input, select, label, .controles, .tabela-wrap, .grafico, .pilulas")) return;
     mostrar(atual + 1);
   });
 
